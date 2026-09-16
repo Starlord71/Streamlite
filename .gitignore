@@ -1,0 +1,23 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+*.user
+
+# Visual Studio
+.vs/
+.vscode/
+*.suo
+*.userosscache
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
