@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using MediaConverter.App.Services;
 using MediaConverter.Core.Interfaces;
 using MediaConverter.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,10 @@ public partial class App : Application
 
         _serviceProvider = BuildServiceProvider();
 
+        // Apply the saved (or system-default) culture before any UI exists, so the first render and
+        // the window title are already localized.
+        _serviceProvider.GetRequiredService<LanguageService>().Initialize();
+
         var mainWindow = new MainWindow(_serviceProvider);
         MainWindow = mainWindow;
         mainWindow.Show();
@@ -35,7 +40,8 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Registers the Core services. Only <see cref="IBinariesProvisioningService"/> is used by
+    /// Registers the Core services, the localization services and the App-level
+    /// <see cref="LanguageService"/>. Only <see cref="IBinariesProvisioningService"/> is used by
     /// the UI in this phase; the audio and video services are registered now so later phases can
     /// inject them directly. <see cref="BinariesProvisioningService"/> is a singleton because it
     /// owns a long-lived <see cref="System.Net.Http.HttpClient"/> that must be reused and disposed.
@@ -44,6 +50,14 @@ public partial class App : Application
     private static ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
+
+        // AddLocalization registers IStringLocalizerFactory and IStringLocalizer<T>. Its factory
+        // depends on ILoggerFactory, so logging must be registered as well. The default resource
+        // base name is the marker type's full name (MediaConverter.App.Resources.Resources),
+        // which matches Resources.resx.
+        services.AddLogging();
+        services.AddLocalization();
+        services.AddSingleton<LanguageService>();
 
         services.AddSingleton<IBinariesProvisioningService, BinariesProvisioningService>();
         services.AddSingleton<IAudioConverterService, AudioConverterService>();

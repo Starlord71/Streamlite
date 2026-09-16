@@ -16,11 +16,45 @@ body {
 
 .app-shell {
     display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 16px 32px 32px;
+    box-sizing: border-box;
+}
+
+.app-content {
+    flex: 1;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 32px;
-    box-sizing: border-box;
+}
+
+.language-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.language-label {
+    color: #55606c;
+}
+
+.language-option {
+    padding: 4px 12px;
+    border: 1px solid #c7ccd3;
+    border-radius: 999px;
+    background-color: transparent;
+    color: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.language-option-active {
+    border-color: #2f6feb;
+    background-color: #2f6feb;
+    color: #ffffff;
 }
 
 .setup,
@@ -79,6 +113,29 @@ body {
     background-color: #2457c5;
 }
 
+.language-choice-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.language-choice-button {
+    min-width: 140px;
+    border: 1px solid #2f6feb;
+    background-color: transparent;
+    color: #2f6feb;
+}
+
+.language-choice-button:hover {
+    background-color: rgba(47, 111, 235, 0.08);
+}
+
+.language-choice-button.language-option-active {
+    background-color: #2f6feb;
+    color: #ffffff;
+}
+
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #16181d;
@@ -93,5 +150,13 @@ body {
 
     .progress-track {
         background-color: #2b2f37;
+    }
+
+    .language-label {
+        color: #9aa2ad;
+    }
+
+    .language-option {
+        border-color: #3a4049;
     }
 }

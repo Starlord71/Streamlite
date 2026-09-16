@@ -1,11 +1,47 @@
 @implements IDisposable
 @inject IBinariesProvisioningService ProvisioningService
+@inject IStringLocalizer<AppResources> Localizer
+@inject LanguageService Language
 
 <div class="app-shell">
-    @if (_state == SetupState.Preparing)
+    <header class="language-bar">
+        <span class="language-label">@Localizer["LanguageLabel"]</span>
+        <button type="button"
+                class="language-option @ActiveLanguageClass(LanguageService.English)"
+                @onclick="() => SelectLanguageAsync(LanguageService.English)">
+            @Localizer["LanguageEnglish"]
+        </button>
+        <button type="button"
+                class="language-option @ActiveLanguageClass(LanguageService.Spanish)"
+                @onclick="() => SelectLanguageAsync(LanguageService.Spanish)">
+            @Localizer["LanguageSpanish"]
+        </button>
+    </header>
+
+    <main class="app-content">
+        @if (_screen == AppScreen.ChooseLanguage)
+        {
+        <section class="setup language-choice">
+            <h1 class="setup-title">@Localizer["LanguageSelectionTitle"]</h1>
+            <p class="setup-message">@Localizer["LanguageSelectionMessage"]</p>
+            <div class="language-choice-actions">
+                <button type="button"
+                        class="setup-retry language-choice-button @ActiveLanguageClass(LanguageService.English)"
+                        @onclick="() => SelectLanguageAsync(LanguageService.English)">
+                    @Localizer["LanguageEnglish"]
+                </button>
+                <button type="button"
+                        class="setup-retry language-choice-button @ActiveLanguageClass(LanguageService.Spanish)"
+                        @onclick="() => SelectLanguageAsync(LanguageService.Spanish)">
+                    @Localizer["LanguageSpanish"]
+                </button>
+            </div>
+        </section>
+    }
+    else if (_screen == AppScreen.Preparing)
     {
         <section class="setup">
-            <h1 class="setup-title">Preparing the application...</h1>
+            <h1 class="setup-title">@Localizer["PreparingTitle"]</h1>
             <p class="setup-stage">@DescribeStage(_progress?.Stage)</p>
             <div class="progress-track">
                 <div class="progress-fill" style="width:@(PercentageText)%"></div>
@@ -13,36 +49,35 @@
             <p class="setup-percentage">@(PercentageText)%</p>
         </section>
     }
-    else if (_state == SetupState.Failed)
+    else if (_screen == AppScreen.Failed)
     {
         <section class="setup setup-error">
-            <h1 class="setup-title">Setup failed</h1>
+            <h1 class="setup-title">@Localizer["SetupFailedTitle"]</h1>
             <p class="setup-message">@DescribeError(_errorCode ?? ErrorCode.Unknown)</p>
-            <button type="button" class="setup-retry" @onclick="RunProvisioningAsync">Retry</button>
+            <button type="button" class="setup-retry" @onclick="RunProvisioningAsync">@Localizer["RetryButton"]</button>
         </section>
     }
     else
     {
         <section class="ready">
-            <h1 class="ready-title">MediaConverter</h1>
-            <p class="ready-message">The application is ready. Feature screens arrive in the next phases.</p>
+            <h1 class="ready-title">@Localizer["AppTitle"]</h1>
+            <p class="ready-message">@Localizer["ReadyMessage"]</p>
         </section>
     }
+    </main>
 </div>
 
 @code {
-    // Every string in this component is a provisional placeholder. Phase 6 replaces them with
-    // bilingual (ES/EN) resx resources resolved through IStringLocalizer.
-
-    private enum SetupState
+    private enum AppScreen
     {
+        ChooseLanguage,
         Preparing,
         Failed,
         Ready,
     }
 
     private readonly CancellationTokenSource _cancellation = new();
-    private SetupState _state = SetupState.Preparing;
+    private AppScreen _screen;
     private ProgressInfo? _progress;
     private ErrorCode? _errorCode;
     private bool _disposed;
@@ -50,7 +85,44 @@
     private string PercentageText =>
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
 
-    protected override Task OnInitializedAsync() => RunProvisioningAsync();
+    protected override Task OnInitializedAsync()
+    {
+        Language.LanguageChanged += OnLanguageChanged;
+
+        // First run: ask for the language before provisioning so the setup screen is already
+        // shown in the chosen language. On later runs the saved preference is applied at startup
+        // and provisioning can begin immediately.
+        if (Language.HasSavedPreference)
+        {
+            return RunProvisioningAsync();
+        }
+
+        _screen = AppScreen.ChooseLanguage;
+        return Task.CompletedTask;
+    }
+
+    private string ActiveLanguageClass(string languageCode) =>
+        Language.CurrentLanguage == languageCode ? "language-option-active" : string.Empty;
+
+    private async Task SelectLanguageAsync(string languageCode)
+    {
+        Language.SetLanguage(languageCode);
+
+        if (_screen == AppScreen.ChooseLanguage)
+        {
+            await RunProvisioningAsync();
+        }
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
 
     private async Task RunProvisioningAsync()
     {
@@ -59,7 +131,7 @@
             return;
         }
 
-        _state = SetupState.Preparing;
+        _screen = AppScreen.Preparing;
         _errorCode = null;
         _progress = new ProgressInfo(0, ProgressStage.Starting);
         await InvokeAsync(StateHasChanged);
@@ -94,47 +166,53 @@
 
         if (result.Succeeded)
         {
-            _state = SetupState.Ready;
+            _screen = AppScreen.Ready;
         }
         else
         {
-            _state = SetupState.Failed;
+            _screen = AppScreen.Failed;
             _errorCode = result.ErrorCode ?? ErrorCode.Unknown;
         }
 
         await InvokeAsync(StateHasChanged);
     }
 
-    private static string DescribeStage(ProgressStage? stage) => stage switch
+    private string DescribeStage(ProgressStage? stage) => stage switch
     {
-        ProgressStage.Starting => "Starting...",
-        ProgressStage.Analyzing => "Analyzing...",
-        ProgressStage.Downloading => "Downloading required components...",
-        ProgressStage.Converting => "Converting...",
-        ProgressStage.Installing => "Installing...",
-        ProgressStage.Finalizing => "Finalizing...",
-        ProgressStage.Completed => "Completed",
-        _ => "Working...",
+        ProgressStage.Starting => Localizer["StageStarting"],
+        ProgressStage.Analyzing => Localizer["StageAnalyzing"],
+        ProgressStage.Downloading => Localizer["StageDownloading"],
+        ProgressStage.Converting => Localizer["StageConverting"],
+        ProgressStage.Installing => Localizer["StageInstalling"],
+        ProgressStage.Finalizing => Localizer["StageFinalizing"],
+        ProgressStage.Completed => Localizer["StageCompleted"],
+        _ => Localizer["StageWorking"],
     };
 
-    private static string DescribeError(ErrorCode code) => code switch
+    private string DescribeError(ErrorCode code) => code switch
     {
-        ErrorCode.Cancelled => "The setup was cancelled.",
-        ErrorCode.InvalidInput => "Some required information was invalid.",
-        ErrorCode.FileNotFound => "A required file could not be found.",
-        ErrorCode.OutputPathInvalid => "The destination folder is not accessible.",
-        ErrorCode.AccessDenied => "Access to a file or folder was denied. Try running the application as administrator.",
-        ErrorCode.InsufficientDiskSpace => "There is not enough free disk space.",
-        ErrorCode.BinaryNotFound => "A required external component is missing.",
-        ErrorCode.BinaryDownloadFailed => "A required component could not be downloaded.",
-        ErrorCode.ProvisioningFailed => "The required components could not be prepared.",
-        ErrorCode.NetworkError => "No internet connection. Check your network and try again.",
-        _ => $"Setup failed ({code}).",
+        ErrorCode.Cancelled => Localizer["ErrorCancelled"],
+        ErrorCode.InvalidInput => Localizer["ErrorInvalidInput"],
+        ErrorCode.FileNotFound => Localizer["ErrorFileNotFound"],
+        ErrorCode.OutputPathInvalid => Localizer["ErrorOutputPathInvalid"],
+        ErrorCode.UnsupportedFormat => Localizer["ErrorUnsupportedFormat"],
+        ErrorCode.InvalidUrl => Localizer["ErrorInvalidUrl"],
+        ErrorCode.NetworkError => Localizer["ErrorNetworkError"],
+        ErrorCode.AccessDenied => Localizer["ErrorAccessDenied"],
+        ErrorCode.InsufficientDiskSpace => Localizer["ErrorInsufficientDiskSpace"],
+        ErrorCode.BinaryNotFound => Localizer["ErrorBinaryNotFound"],
+        ErrorCode.BinaryDownloadFailed => Localizer["ErrorBinaryDownloadFailed"],
+        ErrorCode.ProvisioningFailed => Localizer["ErrorProvisioningFailed"],
+        ErrorCode.ConversionFailed => Localizer["ErrorConversionFailed"],
+        ErrorCode.DownloadFailed => Localizer["ErrorDownloadFailed"],
+        ErrorCode.Unknown => Localizer["ErrorUnknown"],
+        _ => Localizer["ErrorFallback", code],
     };
 
     public void Dispose()
     {
         _disposed = true;
+        Language.LanguageChanged -= OnLanguageChanged;
         _cancellation.Cancel();
         _cancellation.Dispose();
     }

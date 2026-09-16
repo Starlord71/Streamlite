@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    Spanish (es) translations for the application UI. Keys must stay in sync with Resources.resx.
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>MediaConverter</value>
+  </data>
+  <data name="PreparingTitle" xml:space="preserve">
+    <value>Preparando la aplicación...</value>
+  </data>
+  <data name="SetupFailedTitle" xml:space="preserve">
+    <value>Falló la preparación</value>
+  </data>
+  <data name="RetryButton" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="ReadyMessage" xml:space="preserve">
+    <value>La aplicación está lista. Las pantallas de funciones llegarán en las próximas fases.</value>
+  </data>
+  <data name="StageStarting" xml:space="preserve">
+    <value>Iniciando...</value>
+  </data>
+  <data name="StageAnalyzing" xml:space="preserve">
+    <value>Analizando...</value>
+  </data>
+  <data name="StageDownloading" xml:space="preserve">
+    <value>Descargando los componentes necesarios...</value>
+  </data>
+  <data name="StageConverting" xml:space="preserve">
+    <value>Convirtiendo...</value>
+  </data>
+  <data name="StageInstalling" xml:space="preserve">
+    <value>Instalando...</value>
+  </data>
+  <data name="StageFinalizing" xml:space="preserve">
+    <value>Finalizando...</value>
+  </data>
+  <data name="StageCompleted" xml:space="preserve">
+    <value>Completado</value>
+  </data>
+  <data name="StageWorking" xml:space="preserve">
+    <value>Procesando...</value>
+  </data>
+  <data name="ErrorUnknown" xml:space="preserve">
+    <value>Ocurrió un error inesperado durante la preparación.</value>
+  </data>
+  <data name="ErrorCancelled" xml:space="preserve">
+    <value>Se canceló la preparación.</value>
+  </data>
+  <data name="ErrorInvalidInput" xml:space="preserve">
+    <value>Alguna información requerida no era válida.</value>
+  </data>
+  <data name="ErrorFileNotFound" xml:space="preserve">
+    <value>No se encontró un archivo necesario.</value>
+  </data>
+  <data name="ErrorOutputPathInvalid" xml:space="preserve">
+    <value>No se puede acceder a la carpeta de destino.</value>
+  </data>
+  <data name="ErrorUnsupportedFormat" xml:space="preserve">
+    <value>El formato de entrada o de salida solicitado no es compatible.</value>
+  </data>
+  <data name="ErrorInvalidUrl" xml:space="preserve">
+    <value>La URL proporcionada no es válida o no es compatible.</value>
+  </data>
+  <data name="ErrorNetworkError" xml:space="preserve">
+    <value>No hay conexión a internet. Revisá tu red e intentá de nuevo.</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Se denegó el acceso a un archivo o carpeta. Intentá ejecutar la aplicación como administrador.</value>
+  </data>
+  <data name="ErrorInsufficientDiskSpace" xml:space="preserve">
+    <value>No hay suficiente espacio libre en disco.</value>
+  </data>
+  <data name="ErrorBinaryNotFound" xml:space="preserve">
+    <value>Falta un componente externo necesario.</value>
+  </data>
+  <data name="ErrorBinaryDownloadFailed" xml:space="preserve">
+    <value>No se pudo descargar un componente necesario.</value>
+  </data>
+  <data name="ErrorProvisioningFailed" xml:space="preserve">
+    <value>No se pudieron preparar los componentes necesarios.</value>
+  </data>
+  <data name="ErrorConversionFailed" xml:space="preserve">
+    <value>Falló una conversión de audio.</value>
+  </data>
+  <data name="ErrorDownloadFailed" xml:space="preserve">
+    <value>Falló una descarga de video.</value>
+  </data>
+  <data name="ErrorFallback" xml:space="preserve">
+    <value>Falló la preparación ({0}).</value>
+  </data>
+  <data name="LanguageSelectionTitle" xml:space="preserve">
+    <value>Elegí tu idioma</value>
+  </data>
+  <data name="LanguageSelectionMessage" xml:space="preserve">
+    <value>Seleccioná el idioma que querés usar. Podés cambiarlo cuando quieras.</value>
+  </data>
+  <data name="LanguageLabel" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageSpanish" xml:space="preserve">
+    <value>Español</value>
+  </data>
+</root>

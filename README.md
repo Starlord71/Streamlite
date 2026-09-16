@@ -66,15 +66,18 @@ no wrapper NuGet packages are used.
 
 ## Status
 
-Phase 5 (WPF shell + BlazorWebView) is complete:
+Phase 6 (ES/EN localization) is complete:
 
 - The WPF host embeds a `BlazorWebView` and the Core services are registered in dependency
   injection.
 - On startup the application calls `IBinariesProvisioningService.ProvisionAsync`, showing real
   download/install progress, and moves to an empty post-setup screen once it finishes.
 - If provisioning fails, the UI shows an error state mapped from the `ErrorCode`.
+- Every user-facing string lives in `Resources.resx` (English, default) and `Resources.es.resx`
+  (Spanish) and is resolved through `IStringLocalizer`.
+- On first run the app asks for the language (pre-selecting the system language) before
+  provisioning, stores the choice in `settings.json` next to the executable and applies it on
+  later runs. A language selector is always visible and switches the whole UI instantly.
 
-Upcoming phases add ES/EN localization, the feature screens (audio conversion, video download and
-video-to-audio), UX polish and packaging. The UI text is currently provisional English and will be
-replaced by localized resources in a later phase. Screenshots and a demo GIF are planned once the
-feature screens exist.
+Upcoming phases add the feature screens (audio conversion, video download and video-to-audio), UX
+polish and packaging. Screenshots and a demo GIF are planned once the feature screens exist.
