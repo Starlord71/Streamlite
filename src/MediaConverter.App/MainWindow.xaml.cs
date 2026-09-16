@@ -1,23 +1,23 @@
-﻿using System.Text;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MediaConverter.App;
 
 /// <summary>
-/// Interaction logic for MainWindow.xaml
+/// Main application window. Hosts the <c>BlazorWebView</c> that renders the Razor components and
+/// exposes the application's dependency injection container to them.
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainWindow"/> class.
+    /// </summary>
+    /// <param name="services">
+    /// The application service provider. Blazor resolves component dependencies from it.
+    /// </param>
+    public MainWindow(IServiceProvider services)
     {
         InitializeComponent();
+        RootWebView.Services = services;
     }
 }

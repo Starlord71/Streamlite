@@ -1,0 +1,141 @@
+@implements IDisposable
+@inject IBinariesProvisioningService ProvisioningService
+
+<div class="app-shell">
+    @if (_state == SetupState.Preparing)
+    {
+        <section class="setup">
+            <h1 class="setup-title">Preparing the application...</h1>
+            <p class="setup-stage">@DescribeStage(_progress?.Stage)</p>
+            <div class="progress-track">
+                <div class="progress-fill" style="width:@(PercentageText)%"></div>
+            </div>
+            <p class="setup-percentage">@(PercentageText)%</p>
+        </section>
+    }
+    else if (_state == SetupState.Failed)
+    {
+        <section class="setup setup-error">
+            <h1 class="setup-title">Setup failed</h1>
+            <p class="setup-message">@DescribeError(_errorCode ?? ErrorCode.Unknown)</p>
+            <button type="button" class="setup-retry" @onclick="RunProvisioningAsync">Retry</button>
+        </section>
+    }
+    else
+    {
+        <section class="ready">
+            <h1 class="ready-title">MediaConverter</h1>
+            <p class="ready-message">The application is ready. Feature screens arrive in the next phases.</p>
+        </section>
+    }
+</div>
+
+@code {
+    // Every string in this component is a provisional placeholder. Phase 6 replaces them with
+    // bilingual (ES/EN) resx resources resolved through IStringLocalizer.
+
+    private enum SetupState
+    {
+        Preparing,
+        Failed,
+        Ready,
+    }
+
+    private readonly CancellationTokenSource _cancellation = new();
+    private SetupState _state = SetupState.Preparing;
+    private ProgressInfo? _progress;
+    private ErrorCode? _errorCode;
+    private bool _disposed;
+
+    private string PercentageText =>
+        Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
+
+    protected override Task OnInitializedAsync() => RunProvisioningAsync();
+
+    private async Task RunProvisioningAsync()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _state = SetupState.Preparing;
+        _errorCode = null;
+        _progress = new ProgressInfo(0, ProgressStage.Starting);
+        await InvokeAsync(StateHasChanged);
+
+        // Progress callbacks arrive on a background thread, so InvokeAsync marshals the
+        // re-render back onto the Blazor renderer thread.
+        var progress = new Progress<ProgressInfo>(info =>
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _progress = info;
+            _ = InvokeAsync(StateHasChanged);
+        });
+
+        OperationResult result;
+        try
+        {
+            result = await ProvisioningService.ProvisionAsync(progress, _cancellation.Token);
+        }
+        catch (Exception)
+        {
+            result = OperationResult.Fail(ErrorCode.Unknown);
+        }
+
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (result.Succeeded)
+        {
+            _state = SetupState.Ready;
+        }
+        else
+        {
+            _state = SetupState.Failed;
+            _errorCode = result.ErrorCode ?? ErrorCode.Unknown;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string DescribeStage(ProgressStage? stage) => stage switch
+    {
+        ProgressStage.Starting => "Starting...",
+        ProgressStage.Analyzing => "Analyzing...",
+        ProgressStage.Downloading => "Downloading required components...",
+        ProgressStage.Converting => "Converting...",
+        ProgressStage.Installing => "Installing...",
+        ProgressStage.Finalizing => "Finalizing...",
+        ProgressStage.Completed => "Completed",
+        _ => "Working...",
+    };
+
+    private static string DescribeError(ErrorCode code) => code switch
+    {
+        ErrorCode.Cancelled => "The setup was cancelled.",
+        ErrorCode.InvalidInput => "Some required information was invalid.",
+        ErrorCode.FileNotFound => "A required file could not be found.",
+        ErrorCode.OutputPathInvalid => "The destination folder is not accessible.",
+        ErrorCode.AccessDenied => "Access to a file or folder was denied. Try running the application as administrator.",
+        ErrorCode.InsufficientDiskSpace => "There is not enough free disk space.",
+        ErrorCode.BinaryNotFound => "A required external component is missing.",
+        ErrorCode.BinaryDownloadFailed => "A required component could not be downloaded.",
+        ErrorCode.ProvisioningFailed => "The required components could not be prepared.",
+        ErrorCode.NetworkError => "No internet connection. Check your network and try again.",
+        _ => $"Setup failed ({code}).",
+    };
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _cancellation.Cancel();
+        _cancellation.Dispose();
+    }
+}
