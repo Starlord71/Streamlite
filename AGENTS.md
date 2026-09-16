@@ -27,6 +27,8 @@ Dependency direction is one-way: `App → Core`, `Tests → Core`. Core depends 
 ## Conventions
 
 - NO emojis anywhere (code, UI, docs).
+- XML doc comments are REQUIRED on all public types, members, and enum values (the .NET standard). Comments in English.
+- Indentation follows the .NET standard: 4 spaces, never tabs (`indent_style = space`, `indent_size = 4`), Allman braces (opening brace on its own line), UTF-8 encoding.
 - Unit tests required for all Core logic; never ship Core code without them.
 - Everything user-facing is bilingual ES/EN. UI strings live in resx resources (`Resources.resx` = English default, `Resources.es.resx` = Spanish) resolved via `IStringLocalizer`. Language is chosen at first run and persisted in `settings.json` next to the exe; switchable in-app.
 - Performance and lightweight footprint are the top priority (self-contained single exe, no bundled Chromium).
