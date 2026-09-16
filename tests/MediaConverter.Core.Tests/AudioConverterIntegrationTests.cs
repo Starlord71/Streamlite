@@ -140,4 +140,33 @@ public class AudioConverterIntegrationTests
             Directory.Delete(workDir, recursive: true);
         }
     }
+
+    [Fact]
+    public async Task ConvertAsync_RealFfmpeg_ExtractsMp3FromMp4()
+    {
+        var ffmpegPath = FfmpegPath;
+        if (ffmpegPath is null)
+        {
+            return;
+        }
+
+        var workDir = TestHelpers.CreateTempDirectory();
+        try
+        {
+            var source = Path.Combine(workDir, "input.mp4");
+            await TestHelpers.GenerateVideoAsync(ffmpegPath, source, "sine=frequency=440:duration=2");
+
+            var output = Path.Combine(workDir, "output.mp3");
+            var service = new AudioConverterService(ffmpegPath);
+            var result = await service.ConvertAsync(source, output, AudioFormat.MP3);
+
+            Assert.True(result.Succeeded, $"Expected success, got {result.ErrorCode}.");
+            Assert.True(File.Exists(output), "Extracted MP3 was not created.");
+            Assert.True(new FileInfo(output).Length > 0, "Extracted MP3 is empty.");
+        }
+        finally
+        {
+            Directory.Delete(workDir, recursive: true);
+        }
+    }
 }

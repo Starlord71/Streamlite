@@ -9,6 +9,7 @@ namespace MediaConverter.Core.Tests;
 internal static class TestHelpers
 {
     private const string FfmpegEnvironmentVariable = "MEDIACONVERTER_FFMPEG";
+    private const string YtDlpEnvironmentVariable = "MEDIACONVERTER_YTDLP";
 
     /// <summary>
     /// Locates a usable ffmpeg binary, either from the <c>MEDIACONVERTER_FFMPEG</c>
@@ -16,9 +17,25 @@ internal static class TestHelpers
     /// when none is available.
     /// </summary>
     /// <returns>The full path to ffmpeg, or <see langword="null"/> if it cannot be found.</returns>
-    internal static string? LocateFfmpeg()
+    internal static string? LocateFfmpeg() => LocateBinary(FfmpegEnvironmentVariable, "ffmpeg");
+
+    /// <summary>
+    /// Locates a usable yt-dlp binary, either from the <c>MEDIACONVERTER_YTDLP</c>
+    /// environment variable or next to the test runner, or returns <see langword="null"/>
+    /// when none is available.
+    /// </summary>
+    /// <returns>The full path to yt-dlp, or <see langword="null"/> if it cannot be found.</returns>
+    internal static string? LocateYtDlp() => LocateBinary(YtDlpEnvironmentVariable, "yt-dlp");
+
+    /// <summary>
+    /// Locates a binary either from the given environment variable or next to the test runner.
+    /// </summary>
+    /// <param name="environmentVariable">Name of the environment variable that may override the location.</param>
+    /// <param name="binaryName">Platform-independent binary name without extension.</param>
+    /// <returns>The full path to the binary, or <see langword="null"/> if it cannot be found.</returns>
+    private static string? LocateBinary(string environmentVariable, string binaryName)
     {
-        var fromEnvironment = Environment.GetEnvironmentVariable(FfmpegEnvironmentVariable);
+        var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariable);
         if (!string.IsNullOrEmpty(fromEnvironment) && File.Exists(fromEnvironment))
         {
             return fromEnvironment;
@@ -37,7 +54,7 @@ internal static class TestHelpers
                 continue;
             }
 
-            var candidate = Path.Combine(directory, OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg");
+            var candidate = Path.Combine(directory, OperatingSystem.IsWindows() ? binaryName + ".exe" : binaryName);
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -87,5 +104,46 @@ internal static class TestHelpers
         var stderr = await process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
         Assert.True(process.ExitCode == 0, $"Fixture generation failed: {stderr}");
+    }
+
+    /// <summary>
+    /// Generates an MP4 video fixture (with an audio track) using ffmpeg's lavfi sources,
+    /// asserting that generation succeeds.
+    /// </summary>
+    /// <param name="ffmpegPath">Path to the ffmpeg executable.</param>
+    /// <param name="outputPath">Path where the generated MP4 file will be written.</param>
+    /// <param name="lavfiAudioSource">The lavfi audio source used as the second input.</param>
+    internal static async Task GenerateVideoAsync(string ffmpegPath, string outputPath, string lavfiAudioSource)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = ffmpegPath,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardError = true,
+        };
+        startInfo.ArgumentList.Add("-y");
+        startInfo.ArgumentList.Add("-f");
+        startInfo.ArgumentList.Add("lavfi");
+        startInfo.ArgumentList.Add("-i");
+        startInfo.ArgumentList.Add("testsrc=size=320x240:rate=15:duration=2");
+        startInfo.ArgumentList.Add("-f");
+        startInfo.ArgumentList.Add("lavfi");
+        startInfo.ArgumentList.Add("-i");
+        startInfo.ArgumentList.Add(lavfiAudioSource);
+        startInfo.ArgumentList.Add("-c:v");
+        startInfo.ArgumentList.Add("mpeg4");
+        startInfo.ArgumentList.Add("-pix_fmt");
+        startInfo.ArgumentList.Add("yuv420p");
+        startInfo.ArgumentList.Add("-c:a");
+        startInfo.ArgumentList.Add("aac");
+        startInfo.ArgumentList.Add("-shortest");
+        startInfo.ArgumentList.Add(outputPath);
+
+        using var process = Process.Start(startInfo);
+        Assert.NotNull(process);
+        var stderr = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        Assert.True(process.ExitCode == 0, $"Video fixture generation failed: {stderr}");
     }
 }
