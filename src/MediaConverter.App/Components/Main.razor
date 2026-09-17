@@ -2,17 +2,20 @@
 @inject IBinariesProvisioningService ProvisioningService
 @inject IStringLocalizer<AppResources> Localizer
 @inject LanguageService Language
+@inject OperationCoordinator Operations
 
 <div class="app-shell">
     <header class="language-bar">
         <span class="language-label">@Localizer["LanguageLabel"]</span>
         <button type="button"
                 class="language-option @ActiveLanguageClass(LanguageService.English)"
+                disabled="@Operations.IsBusy"
                 @onclick="() => SelectLanguageAsync(LanguageService.English)">
             @Localizer["LanguageEnglish"]
         </button>
         <button type="button"
                 class="language-option @ActiveLanguageClass(LanguageService.Spanish)"
+                disabled="@Operations.IsBusy"
                 @onclick="() => SelectLanguageAsync(LanguageService.Spanish)">
             @Localizer["LanguageSpanish"]
         </button>
@@ -63,16 +66,19 @@
             <nav class="tab-bar">
                 <button type="button"
                         class="tab @ActiveTabClass(AppTab.Audio)"
+                        disabled="@Operations.IsBusy"
                         @onclick="() => SelectTab(AppTab.Audio)">
                     @Localizer["TabAudio"]
                 </button>
                 <button type="button"
                         class="tab @ActiveTabClass(AppTab.Video)"
+                        disabled="@Operations.IsBusy"
                         @onclick="() => SelectTab(AppTab.Video)">
                     @Localizer["TabVideo"]
                 </button>
                 <button type="button"
                         class="tab @ActiveTabClass(AppTab.VideoToAudio)"
+                        disabled="@Operations.IsBusy"
                         @onclick="() => SelectTab(AppTab.VideoToAudio)">
                     @Localizer["TabVideoToAudio"]
                 </button>
@@ -125,6 +131,7 @@
     protected override Task OnInitializedAsync()
     {
         Language.LanguageChanged += OnLanguageChanged;
+        Operations.Changed += OnOperationsChanged;
 
         // First run: ask for the language before provisioning so the setup screen is already
         // shown in the chosen language. On later runs the saved preference is applied at startup
@@ -156,6 +163,16 @@
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnOperationsChanged(object? sender, EventArgs e)
     {
         if (_disposed)
         {
@@ -222,6 +239,7 @@
     {
         _disposed = true;
         Language.LanguageChanged -= OnLanguageChanged;
+        Operations.Changed -= OnOperationsChanged;
         _cancellation.Cancel();
         _cancellation.Dispose();
     }

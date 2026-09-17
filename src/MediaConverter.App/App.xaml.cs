@@ -59,6 +59,7 @@ public partial class App : Application
         services.AddLocalization();
         services.AddSingleton<LanguageService>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
+        services.AddSingleton<OperationCoordinator>();
 
         services.AddSingleton<IBinariesProvisioningService, BinariesProvisioningService>();
         services.AddSingleton<IAudioConverterService, AudioConverterService>();

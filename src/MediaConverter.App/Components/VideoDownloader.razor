@@ -3,19 +3,26 @@
 @inject IFileDialogService FileDialogs
 @inject IStringLocalizer<AppResources> Localizer
 @inject LanguageService Language
+@inject OperationCoordinator Operations
 
 <section class="panel">
     <h1 class="panel-title">@Localizer["VideoDownloaderTitle"]</h1>
+    <p class="panel-hint">@Localizer["VideoPanelHint"]</p>
 
     <div class="field">
         <label class="field-label" for="video-url">@Localizer["VideoUrlLabel"]</label>
         <input id="video-url"
                type="text"
-               class="text-input"
+               class="text-input @UrlInputClass"
                placeholder="@Localizer["VideoUrlPlaceholder"]"
-               disabled="@_isDownloading"
+               disabled="@Operations.IsBusy"
                @bind="_url"
-               @bind:event="oninput" />
+               @bind:event="oninput"
+               @onblur="ConfirmUrl" />
+        @if (ShowUrlError)
+        {
+            <p class="field-error">@Localizer["VideoUrlInvalidError"]</p>
+        }
     </div>
 
     <div class="field">
@@ -25,7 +32,7 @@
             {
                 <button type="button"
                         class="format-option @FormatClass(format)"
-                        disabled="@_isDownloading"
+                        disabled="@Operations.IsBusy"
                         @onclick="() => SelectFormat(format)">
                     @FormatName(format)
                 </button>
@@ -38,13 +45,18 @@
         <div class="field-row">
             <button type="button"
                     class="secondary-button"
-                    disabled="@_isDownloading"
+                    disabled="@Operations.IsBusy"
                     @onclick="SelectOutputFolderAsync">
                 @Localizer["VideoSelectFolderButton"]
             </button>
             <span class="field-value">@OutputFolderDisplayName</span>
         </div>
     </div>
+
+    @if (ShowEmptyState)
+    {
+        <p class="empty-state">@Localizer["VideoEmptyState"]</p>
+    }
 
     @if (_progress is not null)
     {
@@ -95,6 +107,11 @@
         </div>
     }
 
+    @if (_wasCancelled)
+    {
+        <p class="operation-cancelled">@Localizer.DescribeErrorCode(ErrorCode.Cancelled)</p>
+    }
+
     @if (_errorCode is not null)
     {
         <p class="field-error operation-error">@Localizer.DescribeErrorCode(_errorCode.Value)</p>
@@ -118,6 +135,8 @@
     private CancellationTokenSource? _cancellation;
     private bool _isDownloading;
     private bool _confirmingCancel;
+    private bool _urlConfirmed;
+    private bool _wasCancelled;
     private bool _disposed;
 
     private string OutputFolderDisplayName =>
@@ -126,9 +145,25 @@
     private string PercentageText =>
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
 
+    // The malformed-URL hint only appears after the user leaves the field, so it does not nag while
+    // the link is still being typed. From then on it updates live.
+    private bool ShowUrlError =>
+        _urlConfirmed && !UrlSupport.IsWellFormedVideoUrl(_url);
+
+    private string UrlInputClass => ShowUrlError ? "text-input-invalid" : string.Empty;
+
+    // The empty state and the URL error would otherwise overlap when the field is left blank.
+    private bool ShowEmptyState =>
+        !ShowUrlError
+        && string.IsNullOrWhiteSpace(_url)
+        && _outputDirectory is null
+        && !_isDownloading
+        && _errorCode is null
+        && !_wasCancelled;
+
     private bool CanDownload =>
-        !_isDownloading
-        && !string.IsNullOrWhiteSpace(_url)
+        !Operations.IsBusy
+        && UrlSupport.IsWellFormedVideoUrl(_url)
         && !string.IsNullOrEmpty(_outputDirectory);
 
     protected override void OnInitialized()
@@ -157,6 +192,8 @@
     private string FormatClass(DownloadFormat format) =>
         _format == format ? "format-option-active" : string.Empty;
 
+    private void ConfirmUrl() => _urlConfirmed = true;
+
     private void SelectFormat(DownloadFormat format)
     {
         _format = format;
@@ -176,6 +213,7 @@
             return;
         }
 
+        // A cancelled picker returns null: keep the current folder and show nothing.
         if (string.IsNullOrWhiteSpace(path))
         {
             return;
@@ -197,6 +235,10 @@
         _confirmingCancel = false;
         _progress = new ProgressInfo(0, ProgressStage.Starting);
         _cancellation = new CancellationTokenSource();
+
+        // The coordinator reserves the operation slot before the first await, so a second click
+        // cannot start a parallel download, and releases it before the final render.
+        var operation = Operations.Begin();
         StateHasChanged();
 
         var url = _url;
@@ -231,6 +273,10 @@
         {
             result = OperationResult.Fail(ErrorCode.Unknown);
         }
+        finally
+        {
+            operation.Dispose();
+        }
 
         if (_disposed)
         {
@@ -248,6 +294,12 @@
 
             // The service picks the output file name, so success is reported against the folder.
             _completedOutputDirectory = outputDirectory;
+        }
+        else if (result.ErrorCode == ErrorCode.Cancelled)
+        {
+            // Cancelling is not an error: show a neutral notice and drop the progress bar.
+            _progress = null;
+            _wasCancelled = true;
         }
         else
         {
@@ -272,6 +324,7 @@
     {
         _completedOutputDirectory = null;
         _errorCode = null;
+        _wasCancelled = false;
         _progress = null;
     }
 

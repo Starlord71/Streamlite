@@ -157,6 +157,12 @@ body {
     cursor: pointer;
 }
 
+.tab:disabled,
+.language-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .tab-active {
     border-bottom-color: #2f6feb;
     color: #1b1f24;
@@ -172,9 +178,26 @@ body {
 }
 
 .panel-title {
-    margin: 0 0 20px;
+    margin: 0 0 8px;
     font-size: 20px;
     font-weight: 600;
+}
+
+.panel-hint {
+    margin: 0 0 22px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #55606c;
+}
+
+.empty-state {
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px dashed #c7ccd3;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #55606c;
 }
 
 .field {
@@ -212,9 +235,19 @@ body {
     box-sizing: border-box;
 }
 
+.text-input:focus {
+    border-color: #2f6feb;
+    outline: 2px solid rgba(47, 111, 235, 0.3);
+    outline-offset: 1px;
+}
+
 .text-input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.text-input-invalid {
+    border-color: #b42318;
 }
 
 .format-options {
@@ -293,6 +326,10 @@ body {
 
 .operation-success {
     margin-top: 20px;
+    padding: 12px 16px;
+    border: 1px solid #b7e0c5;
+    border-radius: 6px;
+    background-color: #f0faf3;
 }
 
 .operation-success-message {
@@ -308,9 +345,21 @@ body {
     word-break: break-all;
 }
 
+.operation-cancelled {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border: 1px solid #f0c36d;
+    border-radius: 6px;
+    background-color: #fff8e6;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #8a6100;
+}
+
 .field-error {
     margin: 8px 0 0;
     font-size: 13px;
+    line-height: 1.5;
     color: #b42318;
 }
 
@@ -356,15 +405,22 @@ body {
 
     .language-label,
     .field-label,
-    .tab {
+    .tab,
+    .panel-hint,
+    .empty-state {
         color: #9aa2ad;
     }
 
     .language-option,
     .format-option,
     .secondary-button,
-    .text-input {
+    .text-input,
+    .empty-state {
         border-color: #3a4049;
+    }
+
+    .text-input-invalid {
+        border-color: #e5645a;
     }
 
     .tab-bar {
@@ -375,15 +431,22 @@ body {
         color: #e8eaed;
     }
 
+    .operation-success {
+        border-color: #2f5a3d;
+        background-color: #17251c;
+    }
+
     .operation-success-message {
         color: #6cc48c;
     }
 
+    .operation-cancelled,
     .cancel-confirm {
         border-color: #6b5a2a;
         background-color: #2c2718;
     }
 
+    .operation-cancelled,
     .cancel-confirm-message {
         color: #e0c98a;
     }

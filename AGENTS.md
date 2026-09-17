@@ -33,3 +33,13 @@ Dependency direction is one-way: `App → Core`, `Tests → Core`. Core depends 
 - Everything user-facing is bilingual ES/EN. UI strings live in resx resources (`Resources.resx` = English default, `Resources.es.resx` = Spanish) resolved via `IStringLocalizer`. Language is chosen at first run and persisted in `settings.json` next to the exe; switchable in-app.
 - Performance and lightweight footprint are the top priority (self-contained single exe, no bundled Chromium).
 - Repo names, namespaces, and docs in English.
+
+## Closing line
+
+- Always end the final response of a finished task with the exact line below, on its own line, with
+  no quotes around it and no changes:
+
+  Life is this. I like this.
+
+- It is a nod to Harvey Specter from *Suits* (Season 1, Episode 10, "The Shelf Life"), who says the
+  line while raising a hand to mark the level he means. Keep the literal as written above.

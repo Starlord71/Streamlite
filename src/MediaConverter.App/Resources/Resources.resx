@@ -169,10 +169,10 @@
     <value>The destination folder is not accessible.</value>
   </data>
   <data name="ErrorUnsupportedFormat" xml:space="preserve">
-    <value>The input or requested output format is not supported.</value>
+    <value>That file type is not supported. Choose a supported file and try again.</value>
   </data>
   <data name="ErrorInvalidUrl" xml:space="preserve">
-    <value>The provided URL is not valid or is not supported.</value>
+    <value>That link is not valid. Paste a complete video link and try again.</value>
   </data>
   <data name="ErrorNetworkError" xml:space="preserve">
     <value>No internet connection. Check your network and try again.</value>
@@ -193,10 +193,10 @@
     <value>The required components could not be prepared.</value>
   </data>
   <data name="ErrorConversionFailed" xml:space="preserve">
-    <value>An audio conversion failed.</value>
+    <value>The conversion failed. The file may be damaged or in an unsupported format.</value>
   </data>
   <data name="ErrorDownloadFailed" xml:space="preserve">
-    <value>A video download failed.</value>
+    <value>The download failed. The link may be unavailable; check it and try again.</value>
   </data>
   <data name="ErrorFallback" xml:space="preserve">
     <value>An unexpected error occurred ({0}).</value>
@@ -228,6 +228,9 @@
   <data name="AudioConverterTitle" xml:space="preserve">
     <value>Convert audio</value>
   </data>
+  <data name="AudioPanelHint" xml:space="preserve">
+    <value>Choose an M4A or MP3 file, pick the output format and press Convert.</value>
+  </data>
   <data name="AudioSourceLabel" xml:space="preserve">
     <value>Source file</value>
   </data>
@@ -236,6 +239,9 @@
   </data>
   <data name="AudioNoFileSelected" xml:space="preserve">
     <value>No file selected.</value>
+  </data>
+  <data name="AudioEmptyState" xml:space="preserve">
+    <value>No audio file selected yet. Use "Choose file..." to pick an M4A or MP3 file.</value>
   </data>
   <data name="AudioSourceFormatLabel" xml:space="preserve">
     <value>Detected format</value>
@@ -285,11 +291,17 @@
   <data name="VideoDownloaderTitle" xml:space="preserve">
     <value>Download from URL</value>
   </data>
+  <data name="VideoPanelHint" xml:space="preserve">
+    <value>Paste a video link, choose the format and the destination folder, then press Download.</value>
+  </data>
   <data name="VideoUrlLabel" xml:space="preserve">
     <value>Video URL</value>
   </data>
   <data name="VideoUrlPlaceholder" xml:space="preserve">
     <value>Paste the video link here</value>
+  </data>
+  <data name="VideoUrlInvalidError" xml:space="preserve">
+    <value>Enter a complete link that starts with http:// or https://.</value>
   </data>
   <data name="VideoFormatLabel" xml:space="preserve">
     <value>Download as</value>
@@ -299,6 +311,9 @@
   </data>
   <data name="VideoNoFolderSelected" xml:space="preserve">
     <value>No folder selected.</value>
+  </data>
+  <data name="VideoEmptyState" xml:space="preserve">
+    <value>Nothing to download yet. Paste a video link and choose a destination folder to begin.</value>
   </data>
   <data name="VideoSelectFolderButton" xml:space="preserve">
     <value>Choose folder...</value>
@@ -327,6 +342,9 @@
   <data name="VideoToAudioTitle" xml:space="preserve">
     <value>Extract audio from video</value>
   </data>
+  <data name="VideoToAudioPanelHint" xml:space="preserve">
+    <value>Choose an MP4 file and press Extract audio to create an MP3 file next to it.</value>
+  </data>
   <data name="VideoToAudioSourceLabel" xml:space="preserve">
     <value>Video file</value>
   </data>
@@ -335,6 +353,9 @@
   </data>
   <data name="VideoToAudioNoFileSelected" xml:space="preserve">
     <value>No file selected.</value>
+  </data>
+  <data name="VideoToAudioEmptyState" xml:space="preserve">
+    <value>No video selected yet. Use "Choose file..." to pick an MP4 file.</value>
   </data>
   <data name="VideoToAudioOutputPathLabel" xml:space="preserve">
     <value>Output file</value>

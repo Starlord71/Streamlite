@@ -117,10 +117,10 @@
     <value>No se puede acceder a la carpeta de destino.</value>
   </data>
   <data name="ErrorUnsupportedFormat" xml:space="preserve">
-    <value>El formato de entrada o de salida solicitado no es compatible.</value>
+    <value>Ese tipo de archivo no es compatible. Elegí un archivo compatible e intentá de nuevo.</value>
   </data>
   <data name="ErrorInvalidUrl" xml:space="preserve">
-    <value>La URL proporcionada no es válida o no es compatible.</value>
+    <value>Ese enlace no es válido. Pegá un enlace de video completo e intentá de nuevo.</value>
   </data>
   <data name="ErrorNetworkError" xml:space="preserve">
     <value>No hay conexión a internet. Revisá tu red e intentá de nuevo.</value>
@@ -141,10 +141,10 @@
     <value>No se pudieron preparar los componentes necesarios.</value>
   </data>
   <data name="ErrorConversionFailed" xml:space="preserve">
-    <value>Falló una conversión de audio.</value>
+    <value>Falló la conversión. Puede que el archivo esté dañado o en un formato no compatible.</value>
   </data>
   <data name="ErrorDownloadFailed" xml:space="preserve">
-    <value>Falló una descarga de video.</value>
+    <value>Falló la descarga. Puede que el enlace no esté disponible; revisalo e intentá de nuevo.</value>
   </data>
   <data name="ErrorFallback" xml:space="preserve">
     <value>Ocurrió un error inesperado ({0}).</value>
@@ -176,6 +176,9 @@
   <data name="AudioConverterTitle" xml:space="preserve">
     <value>Convertir audio</value>
   </data>
+  <data name="AudioPanelHint" xml:space="preserve">
+    <value>Elegí un archivo M4A o MP3, elegí el formato de salida y presioná Convertir.</value>
+  </data>
   <data name="AudioSourceLabel" xml:space="preserve">
     <value>Archivo de origen</value>
   </data>
@@ -184,6 +187,9 @@
   </data>
   <data name="AudioNoFileSelected" xml:space="preserve">
     <value>Ningún archivo seleccionado.</value>
+  </data>
+  <data name="AudioEmptyState" xml:space="preserve">
+    <value>Todavía no elegiste un archivo de audio. Usá "Elegir archivo..." para seleccionar un archivo M4A o MP3.</value>
   </data>
   <data name="AudioSourceFormatLabel" xml:space="preserve">
     <value>Formato detectado</value>
@@ -233,11 +239,17 @@
   <data name="VideoDownloaderTitle" xml:space="preserve">
     <value>Descargar desde una URL</value>
   </data>
+  <data name="VideoPanelHint" xml:space="preserve">
+    <value>Pegá el enlace de un video, elegí el formato y la carpeta de destino, y presioná Descargar.</value>
+  </data>
   <data name="VideoUrlLabel" xml:space="preserve">
     <value>URL del video</value>
   </data>
   <data name="VideoUrlPlaceholder" xml:space="preserve">
     <value>Pegá el enlace del video acá</value>
+  </data>
+  <data name="VideoUrlInvalidError" xml:space="preserve">
+    <value>Ingresá un enlace completo que empiece con http:// o https://.</value>
   </data>
   <data name="VideoFormatLabel" xml:space="preserve">
     <value>Descargar como</value>
@@ -247,6 +259,9 @@
   </data>
   <data name="VideoNoFolderSelected" xml:space="preserve">
     <value>Ninguna carpeta seleccionada.</value>
+  </data>
+  <data name="VideoEmptyState" xml:space="preserve">
+    <value>Todavía no hay nada para descargar. Pegá el enlace de un video y elegí una carpeta de destino para empezar.</value>
   </data>
   <data name="VideoSelectFolderButton" xml:space="preserve">
     <value>Elegir carpeta...</value>
@@ -275,6 +290,9 @@
   <data name="VideoToAudioTitle" xml:space="preserve">
     <value>Extraer audio de un video</value>
   </data>
+  <data name="VideoToAudioPanelHint" xml:space="preserve">
+    <value>Elegí un archivo MP4 y presioná Extraer audio para crear un archivo MP3 junto a él.</value>
+  </data>
   <data name="VideoToAudioSourceLabel" xml:space="preserve">
     <value>Archivo de video</value>
   </data>
@@ -283,6 +301,9 @@
   </data>
   <data name="VideoToAudioNoFileSelected" xml:space="preserve">
     <value>Ningún archivo seleccionado.</value>
+  </data>
+  <data name="VideoToAudioEmptyState" xml:space="preserve">
+    <value>Todavía no elegiste un video. Usá "Elegir archivo..." para seleccionar un archivo MP4.</value>
   </data>
   <data name="VideoToAudioOutputPathLabel" xml:space="preserve">
     <value>Archivo de salida</value>

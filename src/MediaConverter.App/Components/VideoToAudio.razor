@@ -3,22 +3,29 @@
 @inject IFileDialogService FileDialogs
 @inject IStringLocalizer<AppResources> Localizer
 @inject LanguageService Language
+@inject OperationCoordinator Operations
 
 <section class="panel">
     <h1 class="panel-title">@Localizer["VideoToAudioTitle"]</h1>
+    <p class="panel-hint">@Localizer["VideoToAudioPanelHint"]</p>
 
     <div class="field">
         <span class="field-label">@Localizer["VideoToAudioSourceLabel"]</span>
         <div class="field-row">
             <button type="button"
                     class="secondary-button"
-                    disabled="@_isExtracting"
+                    disabled="@Operations.IsBusy"
                     @onclick="SelectSourceAsync">
                 @Localizer["VideoToAudioSelectFileButton"]
             </button>
             <span class="field-value">@SourceDisplayName</span>
         </div>
     </div>
+
+    @if (_sourcePath is null && _errorCode is null && !_wasCancelled)
+    {
+        <p class="empty-state">@Localizer["VideoToAudioEmptyState"]</p>
+    }
 
     @if (_sourcePath is not null && _outputPath is not null)
     {
@@ -77,6 +84,11 @@
         </div>
     }
 
+    @if (_wasCancelled)
+    {
+        <p class="operation-cancelled">@Localizer.DescribeErrorCode(ErrorCode.Cancelled)</p>
+    }
+
     @if (_errorCode is not null)
     {
         <p class="field-error operation-error">@Localizer.DescribeErrorCode(_errorCode.Value)</p>
@@ -92,6 +104,7 @@
     private CancellationTokenSource? _cancellation;
     private bool _isExtracting;
     private bool _confirmingCancel;
+    private bool _wasCancelled;
     private bool _disposed;
 
     private string SourceDisplayName =>
@@ -101,7 +114,7 @@
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
 
     private bool CanExtract =>
-        !_isExtracting
+        !Operations.IsBusy
         && _sourcePath is not null
         && _outputPath is not null;
 
@@ -135,6 +148,7 @@
             return;
         }
 
+        // A cancelled picker returns null: keep the current selection and show nothing.
         if (string.IsNullOrWhiteSpace(path))
         {
             return;
@@ -142,10 +156,11 @@
 
         if (!VideoFileSupport.IsSupportedVideoSource(path))
         {
+            // Clear any previous selection so the invalid file cannot be extracted by mistake. The
+            // error is rendered outside the selection block, so it is always visible.
             _sourcePath = null;
             _outputPath = null;
-            _completedOutputPath = null;
-            _progress = null;
+            ResetResult();
             _errorCode = ErrorCode.UnsupportedFormat;
             return;
         }
@@ -170,6 +185,10 @@
         _confirmingCancel = false;
         _progress = new ProgressInfo(0, ProgressStage.Starting);
         _cancellation = new CancellationTokenSource();
+
+        // The coordinator reserves the operation slot before the first await, so a second click
+        // cannot start a parallel extraction, and releases it before the final render.
+        var operation = Operations.Begin();
         StateHasChanged();
 
         var sourcePath = _sourcePath!;
@@ -205,6 +224,10 @@
         {
             result = OperationResult.Fail(ErrorCode.Unknown);
         }
+        finally
+        {
+            operation.Dispose();
+        }
 
         if (_disposed)
         {
@@ -220,6 +243,12 @@
         {
             _progress = new ProgressInfo(100, ProgressStage.Completed);
             _completedOutputPath = outputPath;
+        }
+        else if (result.ErrorCode == ErrorCode.Cancelled)
+        {
+            // Cancelling is not an error: show a neutral notice and drop the progress bar.
+            _progress = null;
+            _wasCancelled = true;
         }
         else
         {
@@ -244,6 +273,7 @@
     {
         _completedOutputPath = null;
         _errorCode = null;
+        _wasCancelled = false;
         _progress = null;
     }
 

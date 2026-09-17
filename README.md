@@ -7,8 +7,9 @@ three tasks:
 - Download media from a URL as MP4, MP3 or M4A.
 - Extract MP3 audio from a local MP4 file.
 
-The project is under active development. The current milestone completes the MVP: the three feature
-tabs, described under [Status](#status).
+The project is under active development. The current milestone completes the MVP and its UX polish:
+the three feature tabs with consistent validation and state handling, described under
+[Status](#status).
 
 ## Architecture
 
@@ -66,35 +67,42 @@ no wrapper NuGet packages are used.
 
 ## Status
 
-Phase 9 (video-to-audio tab) is complete. The MVP now exposes all three features:
+Phase 10 (UX polish) is complete. The MVP from Phase 9 still exposes all three features, now with
+consistent validation, empty states and error handling across the three tabs:
 
 - The WPF host embeds a `BlazorWebView` and the Core services are registered in dependency
   injection.
 - On startup the application calls `IBinariesProvisioningService.ProvisionAsync`, showing real
-  download/install progress, and opens the tabbed workspace once it finishes.
-- If provisioning fails, the UI shows an error state mapped from the `ErrorCode`.
+  download/install progress, and opens the tabbed workspace once it finishes. If there is no
+  internet connection the failure is reported through the localized `NetworkError` message, and a
+  Retry button reruns provisioning.
 - Every user-facing string lives in `Resources.resx` (English, default) and `Resources.es.resx`
-  (Spanish) and is resolved through `IStringLocalizer`.
+  (Spanish) and is resolved through `IStringLocalizer`. Both resource tables keep exact key parity.
 - On first run the app asks for the language (pre-selecting the system language) before
   provisioning, stores the choice in `settings.json` next to the executable and applies it on
-  later runs. A language selector is always visible and switches the whole UI instantly.
+  later runs. A language selector is always visible and switches the whole UI instantly, including
+  the tabs that are not currently rendered.
 - The Audio tab converts a local M4A/MP3 file end to end. The source is picked with a native
-  Windows file dialog, the target format defaults to the opposite of the source, the output path
-  is derived next to the source (with a numeric suffix so an existing file is never overwritten)
-  and the conversion reports real ffmpeg progress and can be cancelled.
-- The Video tab downloads media from a URL end to end. The URL is pasted into a text input, the
-  output format is chosen between MP4, MP3 and M4A, and the destination folder is picked with a
-  native Windows folder dialog. The download reports real yt-dlp progress (stage and percentage),
-  can be cancelled after an inline confirmation (which kills the yt-dlp process tree) and shows an
-  error mapped from the `ErrorCode`. Because the service picks the output file name, the success
-  state reports the destination folder.
-- The Video-to-audio tab extracts MP3 audio from a local MP4 file end to end. The source is picked
-  with a native Windows file dialog (MP4 filter) and a non-MP4 selection is rejected with the
-  localized unsupported-format error. The MP3 output path is derived next to the source by reusing
-  the same non-overwriting naming helper as the Audio tab, and the extraction reuses
-  `IAudioConverterService` (ffmpeg drops the video stream with `-vn`). It reports real ffmpeg
-  progress, can be cancelled after an inline confirmation and shows the generated MP3 path on
-  success.
+  Windows file dialog, the target format defaults to the opposite of the source, and the output
+  path is derived next to the source (with a numeric suffix so an existing file is never
+  overwritten).
+- The Video tab downloads media from a URL end to end. The link is validated as a well-formed
+  `http`/`https` URL (a malformed link is highlighted after the field loses focus and keeps the
+  Download button disabled), the output format is chosen between MP4, MP3 and M4A, and the
+  destination folder is picked with a native Windows folder dialog. Because the service picks the
+  output file name, the success state reports the destination folder.
+- The Video-to-audio tab extracts MP3 audio from a local MP4 file end to end. A non-MP4 selection
+  is rejected with the localized unsupported-format error, and the MP3 output path reuses the same
+  non-overwriting naming helper as the Audio tab.
+- Each tab shows a localized hint that explains the flow to a non-technical user and an empty state
+  before anything is selected. Unsupported-format and operation errors are always rendered, even
+  when no valid selection drives the rest of the form.
+- Cancelling an operation is treated as a neutral outcome (notice, no error styling), clears the
+  progress bar and re-enables every control, so a cancelled or failed run never leaves a stuck
+  state. The inline cancel confirmation disappears on its own if the operation finishes first.
+- An `OperationCoordinator` marks a run as in progress before the first `await`, so a second click
+  cannot start a parallel operation. While an operation runs, the pickers, format options, URL
+  input, tab bar and language selector are disabled and released as soon as it ends.
 
-Upcoming phases add UX polish and packaging.
-Screenshots and a demo GIF are planned once all feature screens exist.
+Upcoming phases add packaging and release documentation.
+Screenshots and a demo GIF are planned once the packaged build is ready.
