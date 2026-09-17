@@ -40,16 +40,22 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Registers the Core services, the localization services and the App-level
-    /// <see cref="LanguageService"/>. Only <see cref="IBinariesProvisioningService"/> is used by
-    /// the UI in this phase; the audio and video services are registered now so later phases can
-    /// inject them directly. <see cref="BinariesProvisioningService"/> is a singleton because it
-    /// owns a long-lived <see cref="System.Net.Http.HttpClient"/> that must be reused and disposed.
+    /// Registers the BlazorWebView infrastructure required to render the components, the Core
+    /// services, the localization services and the App-level <see cref="LanguageService"/>. Only
+    /// <see cref="IBinariesProvisioningService"/> is used by the UI in this phase; the audio and
+    /// video services are registered now so later phases can inject them directly.
+    /// <see cref="BinariesProvisioningService"/> is a singleton because it owns a long-lived
+    /// <see cref="System.Net.Http.HttpClient"/> that must be reused and disposed.
     /// </summary>
     /// <returns>The configured <see cref="ServiceProvider"/>.</returns>
     private static ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
+
+        // AddWpfBlazorWebView registers the WebView2WebViewManager factory that the WPF
+        // BlazorWebView resolves from the container when it applies its control template. Without
+        // it, applying the template throws InvalidOperationException and the window never opens.
+        services.AddWpfBlazorWebView();
 
         // AddLocalization registers IStringLocalizerFactory and IStringLocalizer<T>. Its factory
         // depends on ILoggerFactory, so logging must be registered as well. The default resource
