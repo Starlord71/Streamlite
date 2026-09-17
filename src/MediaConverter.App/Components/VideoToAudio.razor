@@ -1,0 +1,257 @@
+@implements IDisposable
+@inject IAudioConverterService AudioConverterService
+@inject IFileDialogService FileDialogs
+@inject IStringLocalizer<AppResources> Localizer
+@inject LanguageService Language
+
+<section class="panel">
+    <h1 class="panel-title">@Localizer["VideoToAudioTitle"]</h1>
+
+    <div class="field">
+        <span class="field-label">@Localizer["VideoToAudioSourceLabel"]</span>
+        <div class="field-row">
+            <button type="button"
+                    class="secondary-button"
+                    disabled="@_isExtracting"
+                    @onclick="SelectSourceAsync">
+                @Localizer["VideoToAudioSelectFileButton"]
+            </button>
+            <span class="field-value">@SourceDisplayName</span>
+        </div>
+    </div>
+
+    @if (_sourcePath is not null && _outputPath is not null)
+    {
+        <div class="field">
+            <span class="field-label">@Localizer["VideoToAudioOutputPathLabel"]</span>
+            <span class="field-value">@_outputPath</span>
+        </div>
+
+        @if (_progress is not null)
+        {
+            <div class="operation-status">
+                <p class="operation-stage">@Localizer.DescribeStage(_progress.Stage)</p>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width:@(PercentageText)%"></div>
+                </div>
+                <p class="operation-percentage">@(PercentageText)%</p>
+            </div>
+        }
+
+        <div class="actions">
+            <button type="button"
+                    class="primary-button"
+                    disabled="@(!CanExtract)"
+                    @onclick="ExtractAsync">
+                @Localizer["VideoToAudioConvertButton"]
+            </button>
+            @if (_isExtracting && !_confirmingCancel)
+            {
+                <button type="button" class="secondary-button" @onclick="RequestCancel">
+                    @Localizer["VideoToAudioCancelButton"]
+                </button>
+            }
+        </div>
+
+        @if (_confirmingCancel)
+        {
+            <div class="cancel-confirm">
+                <p class="cancel-confirm-message">@Localizer["VideoToAudioCancelConfirmMessage"]</p>
+                <div class="actions">
+                    <button type="button" class="secondary-button" @onclick="ConfirmCancel">
+                        @Localizer["VideoToAudioCancelConfirmYes"]
+                    </button>
+                    <button type="button" class="primary-button" @onclick="DismissCancel">
+                        @Localizer["VideoToAudioCancelConfirmNo"]
+                    </button>
+                </div>
+            </div>
+        }
+    }
+
+    @if (_completedOutputPath is not null)
+    {
+        <div class="operation-success">
+            <p class="operation-success-message">@Localizer["VideoToAudioSuccessMessage"]</p>
+            <p class="operation-path">@_completedOutputPath</p>
+        </div>
+    }
+
+    @if (_errorCode is not null)
+    {
+        <p class="field-error operation-error">@Localizer.DescribeErrorCode(_errorCode.Value)</p>
+    }
+</section>
+
+@code {
+    private string? _sourcePath;
+    private string? _outputPath;
+    private string? _completedOutputPath;
+    private ProgressInfo? _progress;
+    private ErrorCode? _errorCode;
+    private CancellationTokenSource? _cancellation;
+    private bool _isExtracting;
+    private bool _confirmingCancel;
+    private bool _disposed;
+
+    private string SourceDisplayName =>
+        string.IsNullOrEmpty(_sourcePath) ? Localizer["VideoToAudioNoFileSelected"] : _sourcePath;
+
+    private string PercentageText =>
+        Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
+
+    private bool CanExtract =>
+        !_isExtracting
+        && _sourcePath is not null
+        && _outputPath is not null;
+
+    protected override void OnInitialized()
+    {
+        Language.LanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SelectSourceAsync()
+    {
+        string? path;
+        try
+        {
+            path = await FileDialogs.PickFileAsync(
+                Localizer["VideoToAudioFileDialogTitle"],
+                Localizer["VideoToAudioFileDialogFilter"]);
+        }
+        catch (Exception)
+        {
+            _errorCode = ErrorCode.Unknown;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        if (!VideoFileSupport.IsSupportedVideoSource(path))
+        {
+            _sourcePath = null;
+            _outputPath = null;
+            _completedOutputPath = null;
+            _progress = null;
+            _errorCode = ErrorCode.UnsupportedFormat;
+            return;
+        }
+
+        _sourcePath = path;
+
+        // The output always sits next to the source and uses the shared non-colliding naming helper,
+        // so an existing MP3 is never overwritten.
+        _outputPath = AudioFileSupport.BuildTargetPath(path, AudioFormat.MP3);
+        ResetResult();
+    }
+
+    private async Task ExtractAsync()
+    {
+        if (!CanExtract)
+        {
+            return;
+        }
+
+        ResetResult();
+        _isExtracting = true;
+        _confirmingCancel = false;
+        _progress = new ProgressInfo(0, ProgressStage.Starting);
+        _cancellation = new CancellationTokenSource();
+        StateHasChanged();
+
+        var sourcePath = _sourcePath!;
+        var outputPath = _outputPath!;
+        var cancellation = _cancellation;
+
+        // Progress callbacks arrive on a background thread, so InvokeAsync marshals the re-render
+        // back onto the Blazor renderer thread.
+        var progress = new Progress<ProgressInfo>(info =>
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _progress = info;
+            _ = InvokeAsync(StateHasChanged);
+        });
+
+        OperationResult result;
+        try
+        {
+            // The audio converter discards the video stream with ffmpeg's -vn flag, so an MP4
+            // source is handled by the exact same code path as an audio file.
+            result = await AudioConverterService.ConvertAsync(
+                sourcePath,
+                outputPath,
+                AudioFormat.MP3,
+                progress,
+                cancellation.Token);
+        }
+        catch (Exception)
+        {
+            result = OperationResult.Fail(ErrorCode.Unknown);
+        }
+
+        if (_disposed)
+        {
+            return;
+        }
+
+        cancellation.Dispose();
+        _cancellation = null;
+        _isExtracting = false;
+        _confirmingCancel = false;
+
+        if (result.Succeeded)
+        {
+            _progress = new ProgressInfo(100, ProgressStage.Completed);
+            _completedOutputPath = outputPath;
+        }
+        else
+        {
+            _progress = null;
+            _errorCode = result.ErrorCode ?? ErrorCode.Unknown;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RequestCancel() => _confirmingCancel = true;
+
+    private void DismissCancel() => _confirmingCancel = false;
+
+    private void ConfirmCancel()
+    {
+        _confirmingCancel = false;
+        _cancellation?.Cancel();
+    }
+
+    private void ResetResult()
+    {
+        _completedOutputPath = null;
+        _errorCode = null;
+        _progress = null;
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        Language.LanguageChanged -= OnLanguageChanged;
+        _cancellation?.Cancel();
+        _cancellation?.Dispose();
+    }
+}

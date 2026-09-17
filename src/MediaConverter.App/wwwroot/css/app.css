@@ -167,14 +167,6 @@ body {
     padding: 24px 4px;
 }
 
-.coming-soon {
-    margin: 40px auto;
-    max-width: 480px;
-    text-align: center;
-    font-size: 14px;
-    color: #55606c;
-}
-
 .panel {
     max-width: 640px;
 }
@@ -354,8 +346,7 @@ body {
     .setup-percentage,
     .ready-message,
     .operation-stage,
-    .operation-percentage,
-    .coming-soon {
+    .operation-percentage {
         color: #9aa2ad;
     }
 

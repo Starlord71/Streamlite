@@ -225,9 +225,6 @@
   <data name="TabVideoToAudio" xml:space="preserve">
     <value>Video to audio</value>
   </data>
-  <data name="FeatureComingSoon" xml:space="preserve">
-    <value>This feature will be available in an upcoming phase.</value>
-  </data>
   <data name="AudioConverterTitle" xml:space="preserve">
     <value>Convert audio</value>
   </data>
@@ -326,5 +323,44 @@
   </data>
   <data name="VideoSuccessMessage" xml:space="preserve">
     <value>Download completed. The file was saved in:</value>
+  </data>
+  <data name="VideoToAudioTitle" xml:space="preserve">
+    <value>Extract audio from video</value>
+  </data>
+  <data name="VideoToAudioSourceLabel" xml:space="preserve">
+    <value>Video file</value>
+  </data>
+  <data name="VideoToAudioSelectFileButton" xml:space="preserve">
+    <value>Choose file...</value>
+  </data>
+  <data name="VideoToAudioNoFileSelected" xml:space="preserve">
+    <value>No file selected.</value>
+  </data>
+  <data name="VideoToAudioOutputPathLabel" xml:space="preserve">
+    <value>Output file</value>
+  </data>
+  <data name="VideoToAudioConvertButton" xml:space="preserve">
+    <value>Extract audio</value>
+  </data>
+  <data name="VideoToAudioCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to cancel the extraction?</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmYes" xml:space="preserve">
+    <value>Yes, cancel</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmNo" xml:space="preserve">
+    <value>No, continue</value>
+  </data>
+  <data name="VideoToAudioSuccessMessage" xml:space="preserve">
+    <value>Extraction completed. The file was saved to:</value>
+  </data>
+  <data name="VideoToAudioFileDialogTitle" xml:space="preserve">
+    <value>Select a video file</value>
+  </data>
+  <data name="VideoToAudioFileDialogFilter" xml:space="preserve">
+    <value>Video files (*.mp4)|*.mp4</value>
   </data>
 </root>

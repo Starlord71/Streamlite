@@ -7,8 +7,8 @@ three tasks:
 - Download media from a URL as MP4, MP3 or M4A.
 - Extract MP3 audio from a local MP4 file.
 
-The project is under active development. The current milestone is the video download tab, described
-under [Status](#status).
+The project is under active development. The current milestone completes the MVP: the three feature
+tabs, described under [Status](#status).
 
 ## Architecture
 
@@ -66,7 +66,7 @@ no wrapper NuGet packages are used.
 
 ## Status
 
-Phase 8 (video download tab) is complete:
+Phase 9 (video-to-audio tab) is complete. The MVP now exposes all three features:
 
 - The WPF host embeds a `BlazorWebView` and the Core services are registered in dependency
   injection.
@@ -87,7 +87,14 @@ Phase 8 (video download tab) is complete:
   native Windows folder dialog. The download reports real yt-dlp progress (stage and percentage),
   can be cancelled after an inline confirmation (which kills the yt-dlp process tree) and shows an
   error mapped from the `ErrorCode`. Because the service picks the output file name, the success
-  state reports the destination folder. The Video-to-audio tab is a localized placeholder.
+  state reports the destination folder.
+- The Video-to-audio tab extracts MP3 audio from a local MP4 file end to end. The source is picked
+  with a native Windows file dialog (MP4 filter) and a non-MP4 selection is rejected with the
+  localized unsupported-format error. The MP3 output path is derived next to the source by reusing
+  the same non-overwriting naming helper as the Audio tab, and the extraction reuses
+  `IAudioConverterService` (ffmpeg drops the video stream with `-vn`). It reports real ffmpeg
+  progress, can be cancelled after an inline confirmation and shows the generated MP3 path on
+  success.
 
-Upcoming phases add the video-to-audio tab, UX polish and packaging.
+Upcoming phases add UX polish and packaging.
 Screenshots and a demo GIF are planned once all feature screens exist.

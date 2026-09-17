@@ -173,9 +173,6 @@
   <data name="TabVideoToAudio" xml:space="preserve">
     <value>Video a audio</value>
   </data>
-  <data name="FeatureComingSoon" xml:space="preserve">
-    <value>Esta función estará disponible en una próxima fase.</value>
-  </data>
   <data name="AudioConverterTitle" xml:space="preserve">
     <value>Convertir audio</value>
   </data>
@@ -274,5 +271,44 @@
   </data>
   <data name="VideoSuccessMessage" xml:space="preserve">
     <value>Descarga completada. El archivo se guardó en:</value>
+  </data>
+  <data name="VideoToAudioTitle" xml:space="preserve">
+    <value>Extraer audio de un video</value>
+  </data>
+  <data name="VideoToAudioSourceLabel" xml:space="preserve">
+    <value>Archivo de video</value>
+  </data>
+  <data name="VideoToAudioSelectFileButton" xml:space="preserve">
+    <value>Elegir archivo...</value>
+  </data>
+  <data name="VideoToAudioNoFileSelected" xml:space="preserve">
+    <value>Ningún archivo seleccionado.</value>
+  </data>
+  <data name="VideoToAudioOutputPathLabel" xml:space="preserve">
+    <value>Archivo de salida</value>
+  </data>
+  <data name="VideoToAudioConvertButton" xml:space="preserve">
+    <value>Extraer audio</value>
+  </data>
+  <data name="VideoToAudioCancelButton" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmMessage" xml:space="preserve">
+    <value>¿Seguro que querés cancelar la extracción?</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmYes" xml:space="preserve">
+    <value>Sí, cancelar</value>
+  </data>
+  <data name="VideoToAudioCancelConfirmNo" xml:space="preserve">
+    <value>No, continuar</value>
+  </data>
+  <data name="VideoToAudioSuccessMessage" xml:space="preserve">
+    <value>Extracción completada. El archivo se guardó en:</value>
+  </data>
+  <data name="VideoToAudioFileDialogTitle" xml:space="preserve">
+    <value>Seleccioná un archivo de video</value>
+  </data>
+  <data name="VideoToAudioFileDialogFilter" xml:space="preserve">
+    <value>Archivos de video (*.mp4)|*.mp4</value>
   </data>
 </root>
