@@ -1,5 +1,7 @@
 # MediaConverter
 
+**[English](README.md) | [Español](README.es.md)**
+
 <p align="center">
   <img src="docs/images/demo.gif" alt="MediaConverter demo: convert audio, download from a URL and extract audio from a video" width="760">
 </p>
@@ -11,9 +13,9 @@ bilingual (Spanish/English) tool for three everyday tasks:
 - Download media from a URL as MP4, MP3 or M4A.
 - Extract MP3 audio from a local MP4 file.
 
-The project is also a portfolio piece: it demonstrates clean separation of concerns, a testable
-business-logic layer, asynchronous progress reporting, cancellation, and a hybrid desktop UI that
-reuses web skills instead of a bundled browser engine.
+Under the hood it demonstrates clean separation of concerns, a testable business-logic layer,
+asynchronous progress reporting, cancellation, and a hybrid desktop UI that reuses web skills
+instead of a bundled browser engine.
 
 ## Screenshots
 
