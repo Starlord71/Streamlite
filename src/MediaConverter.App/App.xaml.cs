@@ -64,7 +64,12 @@ public partial class App : Application
         services.AddLogging();
         services.AddLocalization();
         services.AddSingleton<LanguageService>();
-        services.AddSingleton<IFileDialogService, FileDialogService>();
+
+        // FileDialogService must be scoped (never singleton): it captures IJSRuntime, which is
+        // only valid inside the WebView's service scope. A singleton would resolve a root
+        // IJSRuntime and every pick would fail with "Cannot invoke JavaScript outside of a WebView
+        // context".
+        services.AddScoped<IFileDialogService, FileDialogService>();
         services.AddSingleton<OperationCoordinator>();
 
         services.AddSingleton<IBinariesProvisioningService, BinariesProvisioningService>();
