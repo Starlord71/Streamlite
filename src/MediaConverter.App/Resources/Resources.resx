@@ -129,9 +129,6 @@
   <data name="RetryButton" xml:space="preserve">
     <value>Retry</value>
   </data>
-  <data name="ReadyMessage" xml:space="preserve">
-    <value>The application is ready. Feature screens arrive in the next phases.</value>
-  </data>
   <data name="StageStarting" xml:space="preserve">
     <value>Starting...</value>
   </data>
@@ -157,10 +154,10 @@
     <value>Working...</value>
   </data>
   <data name="ErrorUnknown" xml:space="preserve">
-    <value>An unexpected error occurred during setup.</value>
+    <value>An unexpected error occurred.</value>
   </data>
   <data name="ErrorCancelled" xml:space="preserve">
-    <value>The setup was cancelled.</value>
+    <value>The operation was cancelled.</value>
   </data>
   <data name="ErrorInvalidInput" xml:space="preserve">
     <value>Some required information was invalid.</value>
@@ -202,7 +199,7 @@
     <value>A video download failed.</value>
   </data>
   <data name="ErrorFallback" xml:space="preserve">
-    <value>Setup failed ({0}).</value>
+    <value>An unexpected error occurred ({0}).</value>
   </data>
   <data name="LanguageSelectionTitle" xml:space="preserve">
     <value>Choose your language</value>
@@ -218,5 +215,71 @@
   </data>
   <data name="LanguageSpanish" xml:space="preserve">
     <value>Español</value>
+  </data>
+  <data name="TabAudio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="TabVideo" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="TabVideoToAudio" xml:space="preserve">
+    <value>Video to audio</value>
+  </data>
+  <data name="FeatureComingSoon" xml:space="preserve">
+    <value>This feature will be available in an upcoming phase.</value>
+  </data>
+  <data name="AudioConverterTitle" xml:space="preserve">
+    <value>Convert audio</value>
+  </data>
+  <data name="AudioSourceLabel" xml:space="preserve">
+    <value>Source file</value>
+  </data>
+  <data name="AudioSelectFileButton" xml:space="preserve">
+    <value>Choose file...</value>
+  </data>
+  <data name="AudioNoFileSelected" xml:space="preserve">
+    <value>No file selected.</value>
+  </data>
+  <data name="AudioSourceFormatLabel" xml:space="preserve">
+    <value>Detected format</value>
+  </data>
+  <data name="AudioTargetFormatLabel" xml:space="preserve">
+    <value>Convert to</value>
+  </data>
+  <data name="AudioOutputPathLabel" xml:space="preserve">
+    <value>Output file</value>
+  </data>
+  <data name="AudioConvertButton" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="AudioCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="AudioCancelConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to cancel the conversion?</value>
+  </data>
+  <data name="AudioCancelConfirmYes" xml:space="preserve">
+    <value>Yes, cancel</value>
+  </data>
+  <data name="AudioCancelConfirmNo" xml:space="preserve">
+    <value>No, continue</value>
+  </data>
+  <data name="AudioSameFormatError" xml:space="preserve">
+    <value>The target format must be different from the source format.</value>
+  </data>
+  <data name="AudioSuccessMessage" xml:space="preserve">
+    <value>Conversion completed. The file was saved to:</value>
+  </data>
+  <data name="AudioFileDialogTitle" xml:space="preserve">
+    <value>Select an audio file</value>
+  </data>
+  <data name="AudioFileDialogFilter" xml:space="preserve">
+    <value>Audio files (*.m4a;*.mp3)|*.m4a;*.mp3</value>
+  </data>
+  <data name="FormatNameM4A" xml:space="preserve">
+    <value>M4A</value>
+  </data>
+  <data name="FormatNameMP3" xml:space="preserve">
+    <value>MP3</value>
   </data>
 </root>

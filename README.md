@@ -7,8 +7,8 @@ three tasks:
 - Download media from a URL as MP4, MP3 or M4A.
 - Extract MP3 audio from a local MP4 file.
 
-The project is under active development. The current milestone is the application shell described
-under [Status](#status).
+The project is under active development. The current milestone is the first feature screen, the
+audio conversion tab, described under [Status](#status).
 
 ## Architecture
 
@@ -66,18 +66,23 @@ no wrapper NuGet packages are used.
 
 ## Status
 
-Phase 6 (ES/EN localization) is complete:
+Phase 7 (audio conversion tab) is complete:
 
 - The WPF host embeds a `BlazorWebView` and the Core services are registered in dependency
   injection.
 - On startup the application calls `IBinariesProvisioningService.ProvisionAsync`, showing real
-  download/install progress, and moves to an empty post-setup screen once it finishes.
+  download/install progress, and opens the tabbed workspace once it finishes.
 - If provisioning fails, the UI shows an error state mapped from the `ErrorCode`.
 - Every user-facing string lives in `Resources.resx` (English, default) and `Resources.es.resx`
   (Spanish) and is resolved through `IStringLocalizer`.
 - On first run the app asks for the language (pre-selecting the system language) before
   provisioning, stores the choice in `settings.json` next to the executable and applies it on
   later runs. A language selector is always visible and switches the whole UI instantly.
+- The Audio tab converts a local M4A/MP3 file end to end. The source is picked with a native
+  Windows file dialog, the target format defaults to the opposite of the source, the output path
+  is derived next to the source (with a numeric suffix so an existing file is never overwritten)
+  and the conversion reports real ffmpeg progress and can be cancelled. The Video and
+  Video-to-audio tabs are localized placeholders.
 
-Upcoming phases add the feature screens (audio conversion, video download and video-to-audio), UX
-polish and packaging. Screenshots and a demo GIF are planned once the feature screens exist.
+Upcoming phases add the video download and video-to-audio tabs, UX polish and packaging.
+Screenshots and a demo GIF are planned once all feature screens exist.

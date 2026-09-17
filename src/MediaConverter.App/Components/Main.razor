@@ -42,7 +42,7 @@
     {
         <section class="setup">
             <h1 class="setup-title">@Localizer["PreparingTitle"]</h1>
-            <p class="setup-stage">@DescribeStage(_progress?.Stage)</p>
+            <p class="setup-stage">@Localizer.DescribeStage(_progress?.Stage)</p>
             <div class="progress-track">
                 <div class="progress-fill" style="width:@(PercentageText)%"></div>
             </div>
@@ -53,15 +53,40 @@
     {
         <section class="setup setup-error">
             <h1 class="setup-title">@Localizer["SetupFailedTitle"]</h1>
-            <p class="setup-message">@DescribeError(_errorCode ?? ErrorCode.Unknown)</p>
+            <p class="setup-message">@Localizer.DescribeErrorCode(_errorCode ?? ErrorCode.Unknown)</p>
             <button type="button" class="setup-retry" @onclick="RunProvisioningAsync">@Localizer["RetryButton"]</button>
         </section>
     }
     else
     {
-        <section class="ready">
-            <h1 class="ready-title">@Localizer["AppTitle"]</h1>
-            <p class="ready-message">@Localizer["ReadyMessage"]</p>
+        <section class="workspace">
+            <nav class="tab-bar">
+                <button type="button"
+                        class="tab @ActiveTabClass(AppTab.Audio)"
+                        @onclick="() => SelectTab(AppTab.Audio)">
+                    @Localizer["TabAudio"]
+                </button>
+                <button type="button"
+                        class="tab @ActiveTabClass(AppTab.Video)"
+                        @onclick="() => SelectTab(AppTab.Video)">
+                    @Localizer["TabVideo"]
+                </button>
+                <button type="button"
+                        class="tab @ActiveTabClass(AppTab.VideoToAudio)"
+                        @onclick="() => SelectTab(AppTab.VideoToAudio)">
+                    @Localizer["TabVideoToAudio"]
+                </button>
+            </nav>
+            <div class="tab-content">
+                @if (_tab == AppTab.Audio)
+                {
+                    <AudioConverter />
+                }
+                else
+                {
+                    <p class="coming-soon">@Localizer["FeatureComingSoon"]</p>
+                }
+            </div>
         </section>
     }
     </main>
@@ -76,8 +101,16 @@
         Ready,
     }
 
+    private enum AppTab
+    {
+        Audio,
+        Video,
+        VideoToAudio,
+    }
+
     private readonly CancellationTokenSource _cancellation = new();
     private AppScreen _screen;
+    private AppTab _tab = AppTab.Audio;
     private ProgressInfo? _progress;
     private ErrorCode? _errorCode;
     private bool _disposed;
@@ -103,6 +136,10 @@
 
     private string ActiveLanguageClass(string languageCode) =>
         Language.CurrentLanguage == languageCode ? "language-option-active" : string.Empty;
+
+    private string ActiveTabClass(AppTab tab) => _tab == tab ? "tab-active" : string.Empty;
+
+    private void SelectTab(AppTab tab) => _tab = tab;
 
     private async Task SelectLanguageAsync(string languageCode)
     {
@@ -176,38 +213,6 @@
 
         await InvokeAsync(StateHasChanged);
     }
-
-    private string DescribeStage(ProgressStage? stage) => stage switch
-    {
-        ProgressStage.Starting => Localizer["StageStarting"],
-        ProgressStage.Analyzing => Localizer["StageAnalyzing"],
-        ProgressStage.Downloading => Localizer["StageDownloading"],
-        ProgressStage.Converting => Localizer["StageConverting"],
-        ProgressStage.Installing => Localizer["StageInstalling"],
-        ProgressStage.Finalizing => Localizer["StageFinalizing"],
-        ProgressStage.Completed => Localizer["StageCompleted"],
-        _ => Localizer["StageWorking"],
-    };
-
-    private string DescribeError(ErrorCode code) => code switch
-    {
-        ErrorCode.Cancelled => Localizer["ErrorCancelled"],
-        ErrorCode.InvalidInput => Localizer["ErrorInvalidInput"],
-        ErrorCode.FileNotFound => Localizer["ErrorFileNotFound"],
-        ErrorCode.OutputPathInvalid => Localizer["ErrorOutputPathInvalid"],
-        ErrorCode.UnsupportedFormat => Localizer["ErrorUnsupportedFormat"],
-        ErrorCode.InvalidUrl => Localizer["ErrorInvalidUrl"],
-        ErrorCode.NetworkError => Localizer["ErrorNetworkError"],
-        ErrorCode.AccessDenied => Localizer["ErrorAccessDenied"],
-        ErrorCode.InsufficientDiskSpace => Localizer["ErrorInsufficientDiskSpace"],
-        ErrorCode.BinaryNotFound => Localizer["ErrorBinaryNotFound"],
-        ErrorCode.BinaryDownloadFailed => Localizer["ErrorBinaryDownloadFailed"],
-        ErrorCode.ProvisioningFailed => Localizer["ErrorProvisioningFailed"],
-        ErrorCode.ConversionFailed => Localizer["ErrorConversionFailed"],
-        ErrorCode.DownloadFailed => Localizer["ErrorDownloadFailed"],
-        ErrorCode.Unknown => Localizer["ErrorUnknown"],
-        _ => Localizer["ErrorFallback", code],
-    };
 
     public void Dispose()
     {
