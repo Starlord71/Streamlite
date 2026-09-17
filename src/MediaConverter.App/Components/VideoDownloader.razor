@@ -1,0 +1,285 @@
+@implements IDisposable
+@inject IVideoDownloaderService VideoDownloaderService
+@inject IFileDialogService FileDialogs
+@inject IStringLocalizer<AppResources> Localizer
+@inject LanguageService Language
+
+<section class="panel">
+    <h1 class="panel-title">@Localizer["VideoDownloaderTitle"]</h1>
+
+    <div class="field">
+        <label class="field-label" for="video-url">@Localizer["VideoUrlLabel"]</label>
+        <input id="video-url"
+               type="text"
+               class="text-input"
+               placeholder="@Localizer["VideoUrlPlaceholder"]"
+               disabled="@_isDownloading"
+               @bind="_url"
+               @bind:event="oninput" />
+    </div>
+
+    <div class="field">
+        <span class="field-label">@Localizer["VideoFormatLabel"]</span>
+        <div class="format-options">
+            @foreach (var format in Formats)
+            {
+                <button type="button"
+                        class="format-option @FormatClass(format)"
+                        disabled="@_isDownloading"
+                        @onclick="() => SelectFormat(format)">
+                    @FormatName(format)
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="field">
+        <span class="field-label">@Localizer["VideoOutputFolderLabel"]</span>
+        <div class="field-row">
+            <button type="button"
+                    class="secondary-button"
+                    disabled="@_isDownloading"
+                    @onclick="SelectOutputFolderAsync">
+                @Localizer["VideoSelectFolderButton"]
+            </button>
+            <span class="field-value">@OutputFolderDisplayName</span>
+        </div>
+    </div>
+
+    @if (_progress is not null)
+    {
+        <div class="operation-status">
+            <p class="operation-stage">@Localizer.DescribeStage(_progress.Stage)</p>
+            <div class="progress-track">
+                <div class="progress-fill" style="width:@(PercentageText)%"></div>
+            </div>
+            <p class="operation-percentage">@(PercentageText)%</p>
+        </div>
+    }
+
+    <div class="actions">
+        <button type="button"
+                class="primary-button"
+                disabled="@(!CanDownload)"
+                @onclick="DownloadAsync">
+            @Localizer["VideoDownloadButton"]
+        </button>
+        @if (_isDownloading && !_confirmingCancel)
+        {
+            <button type="button" class="secondary-button" @onclick="RequestCancel">
+                @Localizer["VideoCancelButton"]
+            </button>
+        }
+    </div>
+
+    @if (_confirmingCancel)
+    {
+        <div class="cancel-confirm">
+            <p class="cancel-confirm-message">@Localizer["VideoCancelConfirmMessage"]</p>
+            <div class="actions">
+                <button type="button" class="secondary-button" @onclick="ConfirmCancel">
+                    @Localizer["VideoCancelConfirmYes"]
+                </button>
+                <button type="button" class="primary-button" @onclick="DismissCancel">
+                    @Localizer["VideoCancelConfirmNo"]
+                </button>
+            </div>
+        </div>
+    }
+
+    @if (_completedOutputDirectory is not null)
+    {
+        <div class="operation-success">
+            <p class="operation-success-message">@Localizer["VideoSuccessMessage"]</p>
+            <p class="operation-path">@_completedOutputDirectory</p>
+        </div>
+    }
+
+    @if (_errorCode is not null)
+    {
+        <p class="field-error operation-error">@Localizer.DescribeErrorCode(_errorCode.Value)</p>
+    }
+</section>
+
+@code {
+    private static readonly DownloadFormat[] Formats =
+    {
+        DownloadFormat.MP4,
+        DownloadFormat.MP3,
+        DownloadFormat.M4A,
+    };
+
+    private string _url = string.Empty;
+    private DownloadFormat _format = DownloadFormat.MP4;
+    private string? _outputDirectory;
+    private string? _completedOutputDirectory;
+    private ProgressInfo? _progress;
+    private ErrorCode? _errorCode;
+    private CancellationTokenSource? _cancellation;
+    private bool _isDownloading;
+    private bool _confirmingCancel;
+    private bool _disposed;
+
+    private string OutputFolderDisplayName =>
+        string.IsNullOrEmpty(_outputDirectory) ? Localizer["VideoNoFolderSelected"] : _outputDirectory;
+
+    private string PercentageText =>
+        Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
+
+    private bool CanDownload =>
+        !_isDownloading
+        && !string.IsNullOrWhiteSpace(_url)
+        && !string.IsNullOrEmpty(_outputDirectory);
+
+    protected override void OnInitialized()
+    {
+        Language.LanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private string FormatName(DownloadFormat format) => format switch
+    {
+        DownloadFormat.MP4 => Localizer["FormatNameMP4"],
+        DownloadFormat.MP3 => Localizer["FormatNameMP3"],
+        DownloadFormat.M4A => Localizer["FormatNameM4A"],
+        _ => format.ToString(),
+    };
+
+    private string FormatClass(DownloadFormat format) =>
+        _format == format ? "format-option-active" : string.Empty;
+
+    private void SelectFormat(DownloadFormat format)
+    {
+        _format = format;
+        ResetResult();
+    }
+
+    private async Task SelectOutputFolderAsync()
+    {
+        string? path;
+        try
+        {
+            path = await FileDialogs.PickFolderAsync(Localizer["VideoFolderDialogTitle"]);
+        }
+        catch (Exception)
+        {
+            _errorCode = ErrorCode.Unknown;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        _outputDirectory = path;
+        ResetResult();
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (!CanDownload)
+        {
+            return;
+        }
+
+        ResetResult();
+        _isDownloading = true;
+        _confirmingCancel = false;
+        _progress = new ProgressInfo(0, ProgressStage.Starting);
+        _cancellation = new CancellationTokenSource();
+        StateHasChanged();
+
+        var url = _url;
+        var outputDirectory = _outputDirectory!;
+        var format = _format;
+        var cancellation = _cancellation;
+
+        // Progress callbacks arrive on a background thread, so InvokeAsync marshals the re-render
+        // back onto the Blazor renderer thread.
+        var progress = new Progress<ProgressInfo>(info =>
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _progress = info;
+            _ = InvokeAsync(StateHasChanged);
+        });
+
+        OperationResult result;
+        try
+        {
+            result = await VideoDownloaderService.DownloadAsync(
+                url,
+                outputDirectory,
+                format,
+                progress,
+                cancellation.Token);
+        }
+        catch (Exception)
+        {
+            result = OperationResult.Fail(ErrorCode.Unknown);
+        }
+
+        if (_disposed)
+        {
+            return;
+        }
+
+        cancellation.Dispose();
+        _cancellation = null;
+        _isDownloading = false;
+        _confirmingCancel = false;
+
+        if (result.Succeeded)
+        {
+            _progress = new ProgressInfo(100, ProgressStage.Completed);
+
+            // The service picks the output file name, so success is reported against the folder.
+            _completedOutputDirectory = outputDirectory;
+        }
+        else
+        {
+            _progress = null;
+            _errorCode = result.ErrorCode ?? ErrorCode.Unknown;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RequestCancel() => _confirmingCancel = true;
+
+    private void DismissCancel() => _confirmingCancel = false;
+
+    private void ConfirmCancel()
+    {
+        _confirmingCancel = false;
+        _cancellation?.Cancel();
+    }
+
+    private void ResetResult()
+    {
+        _completedOutputDirectory = null;
+        _errorCode = null;
+        _progress = null;
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        Language.LanguageChanged -= OnLanguageChanged;
+        _cancellation?.Cancel();
+        _cancellation?.Dispose();
+    }
+}

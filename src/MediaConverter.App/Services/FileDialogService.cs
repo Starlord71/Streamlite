@@ -7,16 +7,17 @@ using Microsoft.Win32;
 namespace MediaConverter.App.Services;
 
 /// <summary>
-/// Native Windows file dialog implementation for the Razor UI. The Razor component talks to the
-/// host through JavaScript interop because a browser file input cannot return a real filesystem
-/// path, which is what ffmpeg needs. JavaScript only forwards the request back to the WPF host,
-/// where <see cref="OpenFileDialog"/> runs on the application dispatcher.
+/// Native Windows file and folder dialog implementation for the Razor UI. The Razor component
+/// talks to the host through JavaScript interop because a browser file input cannot return a real
+/// filesystem path, which is what ffmpeg and yt-dlp need. JavaScript only forwards the request back
+/// to the WPF host, where <see cref="OpenFileDialog"/> or <see cref="OpenFolderDialog"/> runs on the
+/// application dispatcher.
 /// </summary>
 public sealed class FileDialogService : IFileDialogService, IDisposable
 {
     private const string SetHostBridgeFunction = "fileDialog.setHostBridge";
     private const string OpenFilePickerFunction = "fileDialog.openFilePicker";
-    private const string ShowOpenFileDialogMethod = "ShowOpenFileDialogAsync";
+    private const string OpenFolderPickerFunction = "fileDialog.openFolderPicker";
 
     private readonly IJSRuntime _js;
     private DotNetObjectReference<FileDialogService>? _hostBridge;
@@ -46,6 +47,21 @@ public sealed class FileDialogService : IFileDialogService, IDisposable
         return await _js.InvokeAsync<string?>(OpenFilePickerFunction, filter, title);
     }
 
+    /// <inheritdoc/>
+    public async Task<string?> PickFolderAsync(string title)
+    {
+        if (string.IsNullOrEmpty(title))
+        {
+            return null;
+        }
+
+        // Same shared bridge as PickFileAsync: one registration serves both pickers.
+        _hostBridge ??= DotNetObjectReference.Create(this);
+
+        await _js.InvokeVoidAsync(SetHostBridgeFunction, _hostBridge);
+        return await _js.InvokeAsync<string?>(OpenFolderPickerFunction, title);
+    }
+
     /// <summary>
     /// Shows the native open-file dialog. Called from JavaScript through the registered bridge;
     /// the dialog always runs on the WPF application dispatcher.
@@ -73,6 +89,33 @@ public sealed class FileDialogService : IFileDialogService, IDisposable
             };
 
             return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }).Task;
+    }
+
+    /// <summary>
+    /// Shows the native folder-picker dialog. Called from JavaScript through the registered bridge;
+    /// the dialog always runs on the WPF application dispatcher.
+    /// </summary>
+    /// <param name="title">Localized dialog title.</param>
+    /// <returns>The selected absolute directory path, or <see langword="null"/> when the user cancels.</returns>
+    [JSInvokable]
+    public Task<string?> ShowOpenFolderDialogAsync(string title)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            return Task.FromResult<string?>(null);
+        }
+
+        return dispatcher.InvokeAsync(() =>
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = title,
+                Multiselect = false,
+            };
+
+            return dialog.ShowDialog() == true ? dialog.FolderName : null;
         }).Task;
     }
 

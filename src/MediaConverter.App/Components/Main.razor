@@ -82,6 +82,10 @@
                 {
                     <AudioConverter />
                 }
+                else if (_tab == AppTab.Video)
+                {
+                    <VideoDownloader />
+                }
                 else
                 {
                     <p class="coming-soon">@Localizer["FeatureComingSoon"]</p>

@@ -14,4 +14,11 @@ public interface IFileDialogService
     /// <param name="filter">Win32 filter string, for example <c>Audio files (*.m4a;*.mp3)|*.m4a;*.mp3</c>.</param>
     /// <returns>The selected absolute path, or <see langword="null"/> when the user cancels.</returns>
     Task<string?> PickFileAsync(string title, string filter);
+
+    /// <summary>
+    /// Shows the native folder-picker dialog and returns the selected directory path.
+    /// </summary>
+    /// <param name="title">Localized dialog title.</param>
+    /// <returns>The selected absolute directory path, or <see langword="null"/> when the user cancels.</returns>
+    Task<string?> PickFolderAsync(string title);
 }

@@ -7,8 +7,8 @@ three tasks:
 - Download media from a URL as MP4, MP3 or M4A.
 - Extract MP3 audio from a local MP4 file.
 
-The project is under active development. The current milestone is the first feature screen, the
-audio conversion tab, described under [Status](#status).
+The project is under active development. The current milestone is the video download tab, described
+under [Status](#status).
 
 ## Architecture
 
@@ -66,7 +66,7 @@ no wrapper NuGet packages are used.
 
 ## Status
 
-Phase 7 (audio conversion tab) is complete:
+Phase 8 (video download tab) is complete:
 
 - The WPF host embeds a `BlazorWebView` and the Core services are registered in dependency
   injection.
@@ -81,8 +81,13 @@ Phase 7 (audio conversion tab) is complete:
 - The Audio tab converts a local M4A/MP3 file end to end. The source is picked with a native
   Windows file dialog, the target format defaults to the opposite of the source, the output path
   is derived next to the source (with a numeric suffix so an existing file is never overwritten)
-  and the conversion reports real ffmpeg progress and can be cancelled. The Video and
-  Video-to-audio tabs are localized placeholders.
+  and the conversion reports real ffmpeg progress and can be cancelled.
+- The Video tab downloads media from a URL end to end. The URL is pasted into a text input, the
+  output format is chosen between MP4, MP3 and M4A, and the destination folder is picked with a
+  native Windows folder dialog. The download reports real yt-dlp progress (stage and percentage),
+  can be cancelled after an inline confirmation (which kills the yt-dlp process tree) and shows an
+  error mapped from the `ErrorCode`. Because the service picks the output file name, the success
+  state reports the destination folder. The Video-to-audio tab is a localized placeholder.
 
-Upcoming phases add the video download and video-to-audio tabs, UX polish and packaging.
+Upcoming phases add the video-to-audio tab, UX polish and packaging.
 Screenshots and a demo GIF are planned once all feature screens exist.

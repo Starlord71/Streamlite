@@ -282,4 +282,49 @@
   <data name="FormatNameMP3" xml:space="preserve">
     <value>MP3</value>
   </data>
+  <data name="FormatNameMP4" xml:space="preserve">
+    <value>MP4</value>
+  </data>
+  <data name="VideoDownloaderTitle" xml:space="preserve">
+    <value>Download from URL</value>
+  </data>
+  <data name="VideoUrlLabel" xml:space="preserve">
+    <value>Video URL</value>
+  </data>
+  <data name="VideoUrlPlaceholder" xml:space="preserve">
+    <value>Paste the video link here</value>
+  </data>
+  <data name="VideoFormatLabel" xml:space="preserve">
+    <value>Download as</value>
+  </data>
+  <data name="VideoOutputFolderLabel" xml:space="preserve">
+    <value>Destination folder</value>
+  </data>
+  <data name="VideoNoFolderSelected" xml:space="preserve">
+    <value>No folder selected.</value>
+  </data>
+  <data name="VideoSelectFolderButton" xml:space="preserve">
+    <value>Choose folder...</value>
+  </data>
+  <data name="VideoFolderDialogTitle" xml:space="preserve">
+    <value>Select the destination folder</value>
+  </data>
+  <data name="VideoDownloadButton" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="VideoCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="VideoCancelConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to cancel the download?</value>
+  </data>
+  <data name="VideoCancelConfirmYes" xml:space="preserve">
+    <value>Yes, cancel</value>
+  </data>
+  <data name="VideoCancelConfirmNo" xml:space="preserve">
+    <value>No, continue</value>
+  </data>
+  <data name="VideoSuccessMessage" xml:space="preserve">
+    <value>Download completed. The file was saved in:</value>
+  </data>
 </root>
