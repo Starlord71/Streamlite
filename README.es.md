@@ -17,6 +17,11 @@ Por dentro demuestra una separación de responsabilidades limpia, una capa de l�
 testeable, reporte asíncrono de progreso, cancelación y una UI de escritorio híbrida que reutiliza
 habilidades web en lugar de un motor de navegador empaquetado.
 
+**Descarga:** bajá el último `MediaConverter.exe` desde la página de
+[Releases](https://github.com/Starlord71/Streamlite/releases/latest). Es un único archivo
+autocontenido: sin runtime de .NET, sin instalador y sin motor de navegador empaquetado. En el
+primer arranque pregunta el idioma y descarga ffmpeg y yt-dlp, así que necesita internet una vez.
+
 ## Capturas
 
 | Convertir audio | Descargar desde una URL | Extraer el audio de un video |
@@ -92,6 +97,11 @@ La UI se construye con componentes Razor renderizados dentro de un `BlazorWebVie
 reciben los servicios de Core mediante `@inject` estilo constructor, en lugar de una capa clásica de
 view-models MVVM. WebView2 viene con Windows, así que la app no empaqueta ningún motor de navegador.
 
+Los assets estáticos de `wwwroot` están embebidos en el ensamblado y los sirve
+`EmbeddedBlazorWebView`, una subclase chica de `BlazorWebView` que sobrescribe `CreateFileProvider`.
+Sin eso, la página host tendría que estar en una carpeta `wwwroot` junto al ejecutable y la app no
+podría ser un solo archivo.
+
 ### Manejo de errores
 
 Core nunca devuelve textos orientados al usuario. Cada operación devuelve un `OperationResult` que
@@ -129,7 +139,7 @@ inglés):
 | Nombres de salida | Derivados junto al origen, con un sufijo numérico cuando el nombre ya está tomado | Una conversión nunca sobrescribe un archivo existente y el usuario no recibe diálogos sorpresa. |
 | Idiomas | ES + EN mediante recursos `.resx` e `IStringLocalizer` | El mecanismo nativo de .NET, funcionando igual en los componentes Razor y en el shell WPF. |
 | Preferencia de idioma | Detectada del sistema, confirmada en el primer arranque y persistida en `settings.json` junto al ejecutable | La entrega es un único ejecutable, así que "instalar" equivale al primer arranque; el usuario puede cambiar de idioma en cualquier momento. |
-| Distribución | Un único ejecutable autocontenido (`PublishSingleFile` + `SelfContained`) | El usuario final no instala nada: ni runtime de .NET, ni ffmpeg, ni asistente de instalación. |
+| Distribución | Un único ejecutable autocontenido (`PublishSingleFile` + `SelfContained`, con los assets estáticos embebidos en el ensamblado) | El usuario final no instala nada: ni runtime de .NET, ni ffmpeg, ni asistente de instalación, y un solo archivo para ejecutar. |
 
 ## Estructura del proyecto
 
@@ -145,6 +155,7 @@ MediaConverter/
 │   │                                   # BinariesProvisioningService y los parsers de ffmpeg/yt-dlp
 │   └── MediaConverter.App/             # host WPF net9.0-windows
 │       ├── Components/                 # Main, AudioConverter, VideoDownloader, VideoToAudio
+│       ├── Controls/                   # EmbeddedBlazorWebView (sirve los assets estáticos embebidos)
 │       ├── Localization/               # Código de error/etapa a texto localizado
 │       ├── Resources/                  # Resources.resx (inglés) + Resources.es.resx (español)
 │       ├── Services/                   # LanguageService, FileDialogService, OperationCoordinator,
@@ -204,8 +215,10 @@ con su salida parseada para obtener progreso real; no se usan paquetes NuGet env
 
 ## Estado
 
-El MVP, el pulido de UX y la documentación del proyecto están completos. El empaquetado y la
-publicación (entrega del único ejecutable autocontenido) es la fase restante.
+El MVP, el pulido de UX y la documentación del proyecto están completos, y la **v0.1.0 está
+publicada** como un único ejecutable autocontenido para Windows. Bajalo desde la página de
+[Releases](https://github.com/Starlord71/Streamlite/releases) y ejecutalo: no hay runtime de .NET
+que instalar ni asistente de instalación.
 
 - Las tres pestañas funcionan de punta a punta: conversión de audio, descarga desde URL y extracción
   de video a audio.

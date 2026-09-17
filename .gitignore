@@ -3,6 +3,9 @@
 [Oo]bj/
 *.user
 
+# Published artifacts (single-file exe and release zips)
+artifacts/
+
 # Visual Studio
 .vs/
 .vscode/
