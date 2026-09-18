@@ -18,11 +18,12 @@ sequenceDiagram
     alt not an MP4
         Tab->>Tab: show UnsupportedFormat, clear the selection
     else MP4
-        Tab->>Tab: BuildTargetPath(path, MP3) next to the source
+        Tab->>Tab: BuildTargetPath(path, targetFormat) next to the source
+        Note over Tab: targetFormat defaults to MP3 and can be switched to M4A
     end
 
     User->>Tab: Click "Extract audio"
-    Tab->>Core: ConvertAsync(source, output, MP3, progress, token)
+    Tab->>Core: ConvertAsync(source, output, targetFormat, progress, token)
     Note over Core,Ffmpeg: same conversion pipeline, ffmpeg drops the video with -vn
     Core->>Ffmpeg: Process.Start(-vn -progress pipe:1)
     Ffmpeg-->>Core: progress

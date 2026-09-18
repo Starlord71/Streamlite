@@ -18,7 +18,7 @@
                     @onclick="SelectSourceAsync">
                 @Localizer["AudioSelectFileButton"]
             </button>
-            <span class="field-value">@SourceDisplayName</span>
+            <PathDisplay Path="@_sourcePath" EmptyText="@Localizer["AudioNoFileSelected"]" />
         </div>
     </div>
 
@@ -55,7 +55,7 @@
 
         <div class="field">
             <span class="field-label">@Localizer["AudioOutputPathLabel"]</span>
-            <span class="field-value">@_outputPath</span>
+            <PathDisplay Path="@_outputPath" />
         </div>
 
         @if (_progress is not null)
@@ -104,7 +104,7 @@
     {
         <div class="operation-success">
             <p class="operation-success-message">@Localizer["AudioSuccessMessage"]</p>
-            <p class="operation-path">@_completedOutputPath</p>
+            <div class="operation-path"><PathDisplay Path="@_completedOutputPath" /></div>
         </div>
     }
 
@@ -132,9 +132,6 @@
     private bool _confirmingCancel;
     private bool _wasCancelled;
     private bool _disposed;
-
-    private string SourceDisplayName =>
-        string.IsNullOrEmpty(_sourcePath) ? Localizer["AudioNoFileSelected"] : _sourcePath;
 
     private string PercentageText =>
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);

@@ -49,7 +49,7 @@
                     @onclick="SelectOutputFolderAsync">
                 @Localizer["VideoSelectFolderButton"]
             </button>
-            <span class="field-value">@OutputFolderDisplayName</span>
+            <PathDisplay Path="@_outputDirectory" IsDirectory="true" EmptyText="@Localizer["VideoNoFolderSelected"]" />
         </div>
     </div>
 
@@ -103,7 +103,7 @@
     {
         <div class="operation-success">
             <p class="operation-success-message">@Localizer["VideoSuccessMessage"]</p>
-            <p class="operation-path">@_completedOutputDirectory</p>
+            <div class="operation-path"><PathDisplay Path="@_completedOutputDirectory" IsDirectory="true" /></div>
         </div>
     }
 
@@ -138,9 +138,6 @@
     private bool _urlConfirmed;
     private bool _wasCancelled;
     private bool _disposed;
-
-    private string OutputFolderDisplayName =>
-        string.IsNullOrEmpty(_outputDirectory) ? Localizer["VideoNoFolderSelected"] : _outputDirectory;
 
     private string PercentageText =>
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);

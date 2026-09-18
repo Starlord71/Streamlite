@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Windows;
+using MediaConverter.App.Localization;
 using MediaConverter.App.Services;
 using MediaConverter.Core.Interfaces;
 using MediaConverter.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Localization;
 
 namespace MediaConverter.App;
 
@@ -63,6 +66,12 @@ public partial class App : Application
         // which matches Resources.resx.
         services.AddLogging();
         services.AddLocalization();
+
+        // Resolve every localized string with the language selected at runtime rather than the
+        // ambient thread culture, so switching language re-renders immediately instead of only
+        // after a restart.
+        services.Replace(ServiceDescriptor.Singleton<IStringLocalizerFactory, LanguageStringLocalizerFactory>());
+
         services.AddSingleton<LanguageService>();
 
         // FileDialogService must be scoped (never singleton): it captures IJSRuntime, which is

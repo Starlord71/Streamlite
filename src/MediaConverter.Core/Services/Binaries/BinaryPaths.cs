@@ -29,4 +29,25 @@ public static class BinaryPaths
 
         return AppContext.BaseDirectory;
     }
+
+    /// <summary>
+    /// Gets the folder where the application stores its user data, which today means the external
+    /// binaries and the settings file. It lives in the user's local application data folder
+    /// (<c>%LOCALAPPDATA%\MediaConverter</c> on Windows) so nothing is written next to the
+    /// executable: the released application is a single file and the executable folder stays clean.
+    /// </summary>
+    /// <returns>
+    /// The absolute path of the application data folder, falling back to the executable directory
+    /// when the local application data folder is unavailable.
+    /// </returns>
+    public static string GetApplicationDataDirectory()
+    {
+        var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrEmpty(localApplicationData))
+        {
+            return GetExecutableDirectory();
+        }
+
+        return Path.Combine(localApplicationData, "MediaConverter");
+    }
 }

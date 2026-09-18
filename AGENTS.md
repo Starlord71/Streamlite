@@ -21,7 +21,7 @@ Dependency direction is one-way: `App → Core`, `Tests → Core`. Core depends 
 
 - Core exposes interfaces + async methods, reports progress via `IProgress<ProgressInfo>`, supports `CancellationToken`. Errors propagate as codes (`OperationResult.ErrorCode`); the App localizes them. Core never returns user-facing strings.
 - ffmpeg and yt-dlp are invoked via `Process` directly — NO wrapper NuGet packages. Parse their output for real progress (ffmpeg `-progress pipe:1`, yt-dlp `--newline --progress`). On cancel, kill the child process tree.
-- External binaries (ffmpeg, yt-dlp) auto-download/auto-update at first run into a folder next to the exe. In single-file publish, derive that path from `Environment.ProcessPath`, NOT `AppContext.BaseDirectory` (that points to the temp extraction dir).
+- External binaries (ffmpeg, yt-dlp) and `settings.json` live in `%LOCALAPPDATA%\MediaConverter`, resolved through `BinaryPaths.GetApplicationDataDirectory()`. Never write next to the exe: the released application is a single file and its folder must stay clean. `BinaryPaths.GetExecutableDirectory()` (from `Environment.ProcessPath`, NOT `AppContext.BaseDirectory`, which points to the temp extraction dir in single-file publish) is only the fallback when the local application data folder is unavailable.
 - Native file/folder dialogs from Razor UI need JS interop to the WPF host (`IJSRuntime`).
 
 ## Conventions
@@ -30,7 +30,7 @@ Dependency direction is one-way: `App → Core`, `Tests → Core`. Core depends 
 - XML doc comments are REQUIRED on all public types, members, and enum values (the .NET standard). Comments in English.
 - Indentation follows the .NET standard: 4 spaces, never tabs (`indent_style = space`, `indent_size = 4`), Allman braces (opening brace on its own line), UTF-8 encoding.
 - Unit tests required for all Core logic; never ship Core code without them.
-- Everything user-facing is bilingual ES/EN. UI strings live in resx resources (`Resources.resx` = English default, `Resources.es.resx` = Spanish) resolved via `IStringLocalizer`. Language is chosen at first run and persisted in `settings.json` next to the exe; switchable in-app.
+- Everything user-facing is bilingual ES/EN. UI strings live in resx resources (`Resources.resx` = English default, `Resources.es.resx` = Spanish) resolved via `IStringLocalizer`. Language is chosen at first run and persisted in `%LOCALAPPDATA%\MediaConverter\settings.json`; switchable in-app. The App registers `LanguageStringLocalizerFactory`, which resolves each string with the culture from `LanguageService` instead of the ambient thread culture, so switching language re-renders immediately.
 - Performance and lightweight footprint are the top priority (self-contained single exe, no bundled Chromium).
 - Repo names, namespaces, and docs in English.
 

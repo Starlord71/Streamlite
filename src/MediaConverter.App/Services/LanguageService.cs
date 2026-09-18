@@ -8,9 +8,9 @@ namespace MediaConverter.App.Services;
 
 /// <summary>
 /// Owns the active UI language of the application. It applies the matching
-/// <see cref="CultureInfo"/>, persists the user preference to <c>settings.json</c> next to the
-/// executable, and raises <see cref="LanguageChanged"/> so components can re-render when the
-/// language switches.
+/// <see cref="CultureInfo"/>, persists the user preference to <c>settings.json</c> in the
+/// application data folder (<see cref="BinaryPaths.GetApplicationDataDirectory"/>), and raises
+/// <see cref="LanguageChanged"/> so components can re-render when the language switches.
 /// </summary>
 public sealed class LanguageService
 {
@@ -121,7 +121,7 @@ public sealed class LanguageService
     }
 
     private static string GetSettingsPath() =>
-        Path.Combine(BinaryPaths.GetExecutableDirectory(), "settings.json");
+        Path.Combine(BinaryPaths.GetApplicationDataDirectory(), "settings.json");
 
     private static string? ReadSavedLanguage(string path)
     {

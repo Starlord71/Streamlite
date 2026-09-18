@@ -1,0 +1,44 @@
+@*
+    Renders a filesystem path as an emphasized name over a muted containing directory, so long
+    paths wrap cleanly instead of breaking in the middle of a word. The full path is kept in the
+    tooltip. When the path is empty, the localized placeholder passed through EmptyText is shown.
+*@
+
+@if (string.IsNullOrEmpty(Path))
+{
+    <span class="field-value">@EmptyText</span>
+}
+else
+{
+    <span class="path-display" title="@Path">
+        <span class="path-name">@Info.Name</span>
+        @if (!string.IsNullOrEmpty(Info.Directory))
+        {
+            <span class="path-directory">@Info.Directory</span>
+        }
+    </span>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the full path to render. An empty value renders the <see cref="EmptyText"/>.
+    /// </summary>
+    [Parameter]
+    public string? Path { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the path points to a directory. When
+    /// <see langword="true"/>, the last folder segment is emphasized instead of a file name.
+    /// </summary>
+    [Parameter]
+    public bool IsDirectory { get; set; }
+
+    /// <summary>
+    /// Gets or sets the localized text shown when <see cref="Path"/> is empty.
+    /// </summary>
+    [Parameter]
+    public string? EmptyText { get; set; }
+
+    private PathDisplayInfo Info =>
+        IsDirectory ? PathDisplayInfo.FromDirectory(Path) : PathDisplayInfo.FromFile(Path);
+}

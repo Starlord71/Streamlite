@@ -188,15 +188,15 @@ public sealed class VideoDownloaderService : IVideoDownloaderService
     }
 
     /// <summary>
-    /// Resolves the full path to a binary located next to the application executable, using
-    /// <see cref="BinaryPaths.GetExecutableDirectory"/> so single-file publish works correctly.
+    /// Resolves the full path to a binary, which the provisioning service installs in the
+    /// application data folder (<see cref="BinaryPaths.GetApplicationDataDirectory"/>).
     /// </summary>
     /// <param name="binaryName">The platform-independent binary name, for example <c>yt-dlp</c>.</param>
     /// <returns>The full path of the binary for the current platform.</returns>
     private static string ResolveDefaultBinaryPath(string binaryName)
     {
         var fileName = OperatingSystem.IsWindows() ? binaryName + ".exe" : binaryName;
-        return Path.Combine(BinaryPaths.GetExecutableDirectory(), fileName);
+        return Path.Combine(BinaryPaths.GetApplicationDataDirectory(), fileName);
     }
 
     private static bool IsDefinedFormat(DownloadFormat format) =>

@@ -51,7 +51,7 @@ flowchart TB
     Interfaces --> Models
     Services --> Models
 
-    subgraph External["External tools and files (next to the executable)"]
+    subgraph External["External tools and files (application data folder)"]
         FFmpeg["ffmpeg.exe"]
         YtDlp["yt-dlp.exe"]
         Settings["settings.json (language preference)"]

@@ -1,7 +1,8 @@
 # Binaries provisioning
 
-First-run flow that prepares ffmpeg and yt-dlp next to the executable. Progress is real
-(byte-based), and a failure is mapped to a machine-readable code that the App localizes.
+First-run flow that prepares ffmpeg and yt-dlp in the application data folder
+(`%LOCALAPPDATA%\MediaConverter`). Progress is real (byte-based), and a failure is mapped to a
+machine-readable code that the App localizes.
 
 ```mermaid
 sequenceDiagram

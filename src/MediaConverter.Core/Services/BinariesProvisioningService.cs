@@ -27,10 +27,10 @@ public sealed class BinariesProvisioningService : IBinariesProvisioningService, 
     /// Initializes a new instance of the <see cref="BinariesProvisioningService"/> class.
     /// </summary>
     /// <param name="binariesDirectory">
-    /// Directory where binaries are installed, or <see langword="null"/> to use the directory
-    /// of the current process (<see cref="Environment.ProcessPath"/>), falling back to
-    /// <see cref="AppContext.BaseDirectory"/> when unavailable. Injecting a directory keeps
-    /// tests isolated from the real application folder.
+    /// Directory where binaries are installed, or <see langword="null"/> to use the application
+    /// data folder (<see cref="BinaryPaths.GetApplicationDataDirectory"/>), which lives in the
+    /// user's local application data folder so nothing is written next to the executable.
+    /// Injecting a directory keeps tests isolated from the real application folder.
     /// </param>
     /// <param name="httpClient">
     /// Optional <see cref="HttpClient"/> used for downloads, injected so tests can substitute
@@ -39,7 +39,7 @@ public sealed class BinariesProvisioningService : IBinariesProvisioningService, 
     public BinariesProvisioningService(string? binariesDirectory = null, HttpClient? httpClient = null)
     {
         _binariesDirectory = string.IsNullOrWhiteSpace(binariesDirectory)
-            ? BinaryPaths.GetExecutableDirectory()
+            ? BinaryPaths.GetApplicationDataDirectory()
             : binariesDirectory;
         _httpClient = httpClient ?? CreateDefaultHttpClient();
         _ownsHttpClient = httpClient is null;

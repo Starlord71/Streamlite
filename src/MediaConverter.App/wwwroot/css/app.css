@@ -214,13 +214,32 @@ body {
 
 .field-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
 
 .field-value {
     font-size: 14px;
-    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+.path-display {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.path-name {
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.path-directory {
+    font-size: 12px;
+    color: #55606c;
+    overflow-wrap: anywhere;
 }
 
 .text-input {
@@ -339,10 +358,7 @@ body {
 }
 
 .operation-path {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    word-break: break-all;
+    margin: 4px 0 0;
 }
 
 .operation-cancelled {
@@ -407,7 +423,8 @@ body {
     .field-label,
     .tab,
     .panel-hint,
-    .empty-state {
+    .empty-state,
+    .path-directory {
         color: #9aa2ad;
     }
 

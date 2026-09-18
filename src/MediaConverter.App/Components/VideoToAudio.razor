@@ -18,7 +18,7 @@
                     @onclick="SelectSourceAsync">
                 @Localizer["VideoToAudioSelectFileButton"]
             </button>
-            <span class="field-value">@SourceDisplayName</span>
+            <PathDisplay Path="@_sourcePath" EmptyText="@Localizer["VideoToAudioNoFileSelected"]" />
         </div>
     </div>
 
@@ -30,8 +30,23 @@
     @if (_sourcePath is not null && _outputPath is not null)
     {
         <div class="field">
+            <span class="field-label">@Localizer["VideoToAudioTargetFormatLabel"]</span>
+            <div class="format-options">
+                @foreach (var format in AudioFileSupport.Formats)
+                {
+                    <button type="button"
+                            class="format-option @TargetFormatClass(format)"
+                            disabled="@Operations.IsBusy"
+                            @onclick="() => SelectTargetFormat(format)">
+                        @FormatName(format)
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="field">
             <span class="field-label">@Localizer["VideoToAudioOutputPathLabel"]</span>
-            <span class="field-value">@_outputPath</span>
+            <PathDisplay Path="@_outputPath" />
         </div>
 
         @if (_progress is not null)
@@ -80,7 +95,7 @@
     {
         <div class="operation-success">
             <p class="operation-success-message">@Localizer["VideoToAudioSuccessMessage"]</p>
-            <p class="operation-path">@_completedOutputPath</p>
+            <div class="operation-path"><PathDisplay Path="@_completedOutputPath" /></div>
         </div>
     }
 
@@ -97,6 +112,7 @@
 
 @code {
     private string? _sourcePath;
+    private AudioFormat _targetFormat = AudioFormat.MP3;
     private string? _outputPath;
     private string? _completedOutputPath;
     private ProgressInfo? _progress;
@@ -107,9 +123,6 @@
     private bool _wasCancelled;
     private bool _disposed;
 
-    private string SourceDisplayName =>
-        string.IsNullOrEmpty(_sourcePath) ? Localizer["VideoToAudioNoFileSelected"] : _sourcePath;
-
     private string PercentageText =>
         Math.Clamp(_progress?.Percentage ?? 0, 0, 100).ToString("0", CultureInfo.InvariantCulture);
 
@@ -117,6 +130,16 @@
         !Operations.IsBusy
         && _sourcePath is not null
         && _outputPath is not null;
+
+    private string TargetFormatClass(AudioFormat format) =>
+        _targetFormat == format ? "format-option-active" : string.Empty;
+
+    private string FormatName(AudioFormat format) => format switch
+    {
+        AudioFormat.M4A => Localizer["FormatNameM4A"],
+        AudioFormat.MP3 => Localizer["FormatNameMP3"],
+        _ => format.ToString(),
+    };
 
     protected override void OnInitialized()
     {
@@ -167,9 +190,23 @@
 
         _sourcePath = path;
 
-        // The output always sits next to the source and uses the shared non-colliding naming helper,
-        // so an existing MP3 is never overwritten.
-        _outputPath = AudioFileSupport.BuildTargetPath(path, AudioFormat.MP3);
+        // MP3 stays the default so the most common extraction needs no extra click. The output
+        // always sits next to the source and uses the shared non-colliding naming helper, so an
+        // existing file is never overwritten.
+        _targetFormat = AudioFormat.MP3;
+        _outputPath = AudioFileSupport.BuildTargetPath(path, _targetFormat);
+        ResetResult();
+    }
+
+    private void SelectTargetFormat(AudioFormat format)
+    {
+        _targetFormat = format;
+
+        if (_sourcePath is not null)
+        {
+            _outputPath = AudioFileSupport.BuildTargetPath(_sourcePath, format);
+        }
+
         ResetResult();
     }
 
@@ -193,6 +230,7 @@
 
         var sourcePath = _sourcePath!;
         var outputPath = _outputPath!;
+        var targetFormat = _targetFormat;
         var cancellation = _cancellation;
 
         // Progress callbacks arrive on a background thread, so InvokeAsync marshals the re-render
@@ -216,7 +254,7 @@
             result = await AudioConverterService.ConvertAsync(
                 sourcePath,
                 outputPath,
-                AudioFormat.MP3,
+                targetFormat,
                 progress,
                 cancellation.Token);
         }

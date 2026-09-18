@@ -11,7 +11,7 @@ bilingual (Spanish/English) tool for three everyday tasks:
 
 - Convert audio files between M4A and MP3.
 - Download media from a URL as MP4, MP3 or M4A.
-- Extract MP3 audio from a local MP4 file.
+- Extract MP3 or M4A audio from a local MP4 file.
 
 Under the hood it demonstrates clean separation of concerns, a testable business-logic layer,
 asynchronous progress reporting, cancellation, and a hybrid desktop UI that reuses web skills
@@ -45,8 +45,9 @@ cancelling removes every partial file.
 
 ### Extract audio from a video
 
-Choose a local MP4 file and the app creates an MP3 next to it, reusing the same non-overwriting
-naming rule as the audio tab. A non-MP4 selection is rejected with a localized message.
+Choose a local MP4 file, pick the output format (MP3 or M4A) and the app creates the audio next to
+it, reusing the same non-overwriting naming rule as the audio tab. A non-MP4 selection is rejected
+with a localized message.
 
 ## Architecture
 
@@ -130,10 +131,10 @@ The full set lives in [`docs/diagrams`](docs/diagrams), one Markdown file per di
 | Business-logic separation | A separate Core class library | Testable and reusable, and it keeps the UI replaceable. Demonstrates separation of concerns. |
 | UI pattern | Razor components with injected services (DI), not classic MVVM | MVVM with `ICommand` and two-way bindings is native to WPF + XAML, not to Blazor. In Blazor the natural pattern is component state plus services. |
 | Progress and state | Async end to end with `IProgress<ProgressInfo>` and `CancellationToken` | The progress bar reflects the real backend state (not a decorative spinner) and long operations can be cancelled. |
-| External binaries | ffmpeg and yt-dlp invoked through `Process`, no wrapper NuGet packages | Full control over arguments and output parsing, and cancellation kills the child process tree. The binaries are downloaded automatically on first run into a folder next to the executable. |
+| External binaries | ffmpeg and yt-dlp invoked through `Process`, no wrapper NuGet packages | Full control over arguments and output parsing, and cancellation kills the child process tree. The binaries are downloaded automatically on first run into the user's local application data folder (`%LOCALAPPDATA%\MediaConverter`), so nothing is written next to the executable. |
 | Output naming | Derived next to the source, with a numeric suffix when the name is taken | A conversion never overwrites an existing file, and the user gets no surprise dialogs. |
 | Languages | ES + EN through `.resx` resources and `IStringLocalizer` | The native .NET mechanism, working the same in Razor components and the WPF shell. |
-| Language preference | Detected from the system, confirmed on first run and persisted in `settings.json` next to the executable | The delivery is a single executable, so "install" equals first run; the user can switch language at any time. |
+| Language preference | Detected from the system, confirmed on first run and persisted in `settings.json` in the application data folder | The delivery is a single executable, so "install" equals first run; the user can switch language at any time and the preference survives updates. |
 | Distribution | A single self-contained executable (`PublishSingleFile` + `SelfContained`, with the static assets embedded in the assembly) | The end user installs nothing: no .NET runtime, no ffmpeg, no setup wizard, and a single file to run. |
 
 ## Project structure
@@ -197,15 +198,16 @@ Run a single test with `dotnet test --filter "FullyQualifiedName~MethodName"`.
 The conversion and download features rely on two external command-line tools:
 
 - **ffmpeg** converts, transcodes and remuxes audio and video. It performs the M4A <-> MP3
-  conversions, extracts MP3 audio from a local MP4 file, and handles the extraction and muxing that
-  yt-dlp delegates to it.
+  conversions, extracts the audio track (MP3 or M4A) from a local MP4 file, and handles the
+  extraction and muxing that yt-dlp delegates to it.
 - **yt-dlp** is a command-line video/audio downloader (a fork of youtube-dl). It resolves the
   requested URL and downloads the best stream available for the chosen output format.
 
-Neither binary is bundled in this repository. They are downloaded automatically on first run into a
-folder next to the application executable, and they keep themselves up to date on later runs. Both
-are invoked directly as external processes (`Process`) with their output parsed for real progress;
-no wrapper NuGet packages are used.
+Neither binary is bundled in this repository. They are downloaded automatically on first run into
+the user's local application data folder (`%LOCALAPPDATA%\MediaConverter`, alongside `settings.json`),
+so the folder that holds the executable stays clean, and they keep themselves up to date on later
+runs. Both are invoked directly as external processes (`Process`) with their output parsed for real
+progress; no wrapper NuGet packages are used.
 
 ## Status
 

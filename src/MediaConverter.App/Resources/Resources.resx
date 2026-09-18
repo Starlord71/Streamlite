@@ -343,7 +343,7 @@
     <value>Extract audio from video</value>
   </data>
   <data name="VideoToAudioPanelHint" xml:space="preserve">
-    <value>Choose an MP4 file and press Extract audio to create an MP3 file next to it.</value>
+    <value>Choose an MP4 file, pick the output format and press Extract audio.</value>
   </data>
   <data name="VideoToAudioSourceLabel" xml:space="preserve">
     <value>Video file</value>
@@ -356,6 +356,9 @@
   </data>
   <data name="VideoToAudioEmptyState" xml:space="preserve">
     <value>No video selected yet. Use "Choose file..." to pick an MP4 file.</value>
+  </data>
+  <data name="VideoToAudioTargetFormatLabel" xml:space="preserve">
+    <value>Extract as</value>
   </data>
   <data name="VideoToAudioOutputPathLabel" xml:space="preserve">
     <value>Output file</value>

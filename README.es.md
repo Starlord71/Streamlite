@@ -11,7 +11,7 @@ herramienta ligera y totalmente bilingüe (español/inglés) para tres tareas co
 
 - Convertir archivos de audio entre M4A y MP3.
 - Descargar medios desde una URL como MP4, MP3 o M4A.
-- Extraer el audio en MP3 de un archivo MP4 local.
+- Extraer el audio en MP3 o M4A de un archivo MP4 local.
 
 Por dentro demuestra una separación de responsabilidades limpia, una capa de lógica de negocio
 testeable, reporte asíncrono de progreso, cancelación y una UI de escritorio híbrida que reutiliza
@@ -45,9 +45,9 @@ reporta progreso real con yt-dlp y, al cancelar, se elimina cada archivo parcial
 
 ### Extraer el audio de un video
 
-Elige un archivo MP4 local y la app crea un MP3 junto a él, reutilizando la misma regla de nombres
-que no sobrescribe que la pestaña de audio. Una selección que no sea MP4 se rechaza con un mensaje
-localizado.
+Elige un archivo MP4 local, elige el formato de salida (MP3 o M4A) y la app crea el audio junto a
+él, reutilizando la misma regla de nombres que no sobrescribe que la pestaña de audio. Una selección
+que no sea MP4 se rechaza con un mensaje localizado.
 
 ## Arquitectura
 
@@ -135,10 +135,10 @@ inglés):
 | Separación de la lógica de negocio | Una biblioteca de clases Core aparte | Testeable y reutilizable, y mantiene la UI reemplazable. Demuestra separación de responsabilidades. |
 | Patrón de UI | Componentes Razor con servicios inyectados (DI), no MVVM clásico | MVVM con `ICommand` y bindings bidireccionales es nativo de WPF + XAML, no de Blazor. En Blazor el patrón natural es estado de componente más servicios. |
 | Progreso y estado | Async de punta a punta con `IProgress<ProgressInfo>` y `CancellationToken` | La barra de progreso refleja el estado real del backend (no un spinner decorativo) y las operaciones largas pueden cancelarse. |
-| Binarios externos | ffmpeg y yt-dlp invocados mediante `Process`, sin paquetes NuGet envoltorio | Control total sobre los argumentos y el parseo de la salida, y la cancelación mata el árbol de procesos hijo. Los binarios se descargan automáticamente en el primer arranque en una carpeta junto al ejecutable. |
+| Binarios externos | ffmpeg y yt-dlp invocados mediante `Process`, sin paquetes NuGet envoltorio | Control total sobre los argumentos y el parseo de la salida, y la cancelación mata el árbol de procesos hijo. Los binarios se descargan automáticamente en el primer arranque en la carpeta de datos local del usuario (`%LOCALAPPDATA%\MediaConverter`), así que no se escribe nada junto al ejecutable. |
 | Nombres de salida | Derivados junto al origen, con un sufijo numérico cuando el nombre ya está tomado | Una conversión nunca sobrescribe un archivo existente y el usuario no recibe diálogos sorpresa. |
 | Idiomas | ES + EN mediante recursos `.resx` e `IStringLocalizer` | El mecanismo nativo de .NET, funcionando igual en los componentes Razor y en el shell WPF. |
-| Preferencia de idioma | Detectada del sistema, confirmada en el primer arranque y persistida en `settings.json` junto al ejecutable | La entrega es un único ejecutable, así que "instalar" equivale al primer arranque; el usuario puede cambiar de idioma en cualquier momento. |
+| Preferencia de idioma | Detectada del sistema, confirmada en el primer arranque y persistida en `settings.json` en la carpeta de datos de la aplicación | La entrega es un único ejecutable, así que "instalar" equivale al primer arranque; el usuario puede cambiar de idioma en cualquier momento y la preferencia sobrevive a las actualizaciones. |
 | Distribución | Un único ejecutable autocontenido (`PublishSingleFile` + `SelfContained`, con los assets estáticos embebidos en el ensamblado) | El usuario final no instala nada: ni runtime de .NET, ni ffmpeg, ni asistente de instalación, y un solo archivo para ejecutar. |
 
 ## Estructura del proyecto
@@ -204,14 +204,17 @@ Ejecuta un test individual con `dotnet test --filter "FullyQualifiedName~MethodN
 Las funciones de conversión y descarga dependen de dos herramientas externas de línea de comandos:
 
 - **ffmpeg** convierte, transcodifica y remuxea audio y video. Realiza las conversiones M4A <-> MP3,
-  extrae el audio MP3 de un archivo MP4 local y maneja la extracción y el muxing que yt-dlp le delega.
+  extrae la pista de audio (MP3 o M4A) de un archivo MP4 local y maneja la extracción y el muxing que
+  yt-dlp le delega.
 - **yt-dlp** es un descargador de video/audio de línea de comandos (un fork de youtube-dl). Resuelve
   la URL solicitada y descarga el mejor stream disponible para el formato de salida elegido.
 
 Ninguno de los dos binarios se empaqueta en este repositorio. Se descargan automáticamente en el
-primer arranque en una carpeta junto al ejecutable de la aplicación, y se mantienen actualizados por
-sí solos en arranques posteriores. Ambos se invocan directamente como procesos externos (`Process`)
-con su salida parseada para obtener progreso real; no se usan paquetes NuGet envoltorio.
+primer arranque en la carpeta de datos local del usuario (`%LOCALAPPDATA%\MediaConverter`, junto a
+`settings.json`), así que la carpeta que contiene el ejecutable queda limpia, y se mantienen
+actualizados por sí solos en arranques posteriores. Ambos se invocan directamente como procesos
+externos (`Process`) con su salida parseada para obtener progreso real; no se usan paquetes NuGet
+envoltorio.
 
 ## Estado
 

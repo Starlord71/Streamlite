@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using MediaConverter.Core.Interfaces;
 using MediaConverter.Core.Models;
+using MediaConverter.Core.Services.Binaries;
 
 namespace MediaConverter.Core.Services;
 
@@ -142,19 +143,14 @@ public sealed class AudioConverterService : IAudioConverterService
     }
 
     /// <summary>
-    /// Resolves the full path to the ffmpeg executable located next to the application
-    /// executable, using <see cref="Environment.ProcessPath"/> first and falling back to
-    /// <see cref="AppContext.BaseDirectory"/> when the process path is unavailable.
+    /// Resolves the full path to the ffmpeg executable, which the provisioning service installs in
+    /// the application data folder (<see cref="BinaryPaths.GetApplicationDataDirectory"/>).
     /// </summary>
     /// <returns>The full path of the ffmpeg binary for the current platform.</returns>
     private static string ResolveDefaultFfmpegPath()
     {
-        var baseDirectory = !string.IsNullOrEmpty(Environment.ProcessPath)
-            ? Path.GetDirectoryName(Environment.ProcessPath)
-            : null;
-        baseDirectory ??= AppContext.BaseDirectory;
         var binaryName = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
-        return Path.Combine(baseDirectory, binaryName);
+        return Path.Combine(BinaryPaths.GetApplicationDataDirectory(), binaryName);
     }
 
     private static bool IsDefinedFormat(AudioFormat format) => format is AudioFormat.M4A or AudioFormat.MP3;
